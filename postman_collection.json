@@ -1,0 +1,940 @@
+{
+  "info": {
+    "name": "cloudata-live-panel-api",
+    "description": "Postman collection generated from the cloudedata-live-pannel-main Flask routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "server_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "path",
+      "value": ".",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user1\",\n  \"password\": \"pass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user1\",\n  \"password\": \"pass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "List files",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/files?path={{path}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "files"
+              ],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "{{path}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Read file",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/read-file?path={{path}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "read-file"
+              ],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "{{path}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create file",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "path",
+                  "value": "{{path}}"
+                },
+                {
+                  "key": "content",
+                  "value": "Hello from Postman"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/create-file",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "create-file"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload file",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "path",
+                  "value": "{{path}}/uploaded.txt",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload-file",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "upload-file"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete file",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "path",
+                  "value": "{{path}}/uploaded.txt"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/delete-file",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "delete-file"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Terminal",
+      "item": [
+        {
+          "name": "Execute command",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "command",
+                  "value": "echo hello"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/terminal",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "terminal"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Server",
+      "item": [
+        {
+          "name": "Add server",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"my-server\",\n  \"host\": \"192.168.0.10\",\n  \"username\": \"admin\",\n  \"port\": 22,\n  \"password\": \"secret\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/add-server",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "add-server"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List servers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/servers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "servers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get server by id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/servers/{{server_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "servers", "{{server_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete server",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/delete-server/{{server_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "delete-server", "{{server_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Connect to server",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "json",
+              "raw": "{\n  \"password\": \"secret\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/connect-server/{{server_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "connect-server", "{{server_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Windows",
+      "item": [
+        {
+          "name": "Get drives",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/drives",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "drives"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Browse path",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/browse?path={{path}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "browse"
+              ],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "{{path}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create folder",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "path",
+                  "value": "{{path}}/new-folder"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/create-folder",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "create-folder"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete path",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "path",
+                  "value": "{{path}}/new-folder"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/delete-path",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "delete-path"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Rename file",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "old_path",
+                  "value": "{{path}}/old.txt"
+                },
+                {
+                  "key": "new_path",
+                  "value": "{{path}}/new.txt"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/rename-file",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rename-file"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Move file",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "source",
+                  "value": "{{path}}/new.txt"
+                },
+                {
+                  "key": "destination",
+                  "value": "{{path}}/moved.txt"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/move-file",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "move-file"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Copy file",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "source",
+                  "value": "{{path}}/new.txt"
+                },
+                {
+                  "key": "destination",
+                  "value": "{{path}}/copy.txt"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/copy-file",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "copy-file"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload file (Windows)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "path",
+                  "value": "{{path}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload-file",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "upload-file"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download file",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/download-file?path={{path}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "download-file"
+              ],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "{{path}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Process",
+      "item": [
+        {
+          "name": "List processes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/processes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "processes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Kill process",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "pid",
+                  "value": "1234"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/kill-process",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kill-process"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "List services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/services",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Start service",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "service_name",
+                  "value": "MyService"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/start-service",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "start-service"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Stop service",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "service_name",
+                  "value": "MyService"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/stop-service",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stop-service"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logs",
+      "item": [
+        {
+          "name": "Get logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/logs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "logs"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Portal",
+      "item": [
+        {
+          "name": "Portal home",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/portal/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "portal", ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/portal/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "portal", "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Portal list servers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/portal/api/servers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "portal", "api", "servers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Portal launch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"server_id\": 1,\n  \"connection_type\": \"rdp\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/portal/api/launch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "portal", "api", "launch"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Portal my sessions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/portal/api/my-sessions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "portal", "api", "my-sessions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Portal sessions stats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/portal/api/sessions/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "portal", "api", "sessions", "stats"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sessions",
+      "item": [
+        {
+          "name": "List sessions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/sessions/?status=active",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api", "sessions", ""
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sessions stats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/sessions/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api", "sessions", "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get session by id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/sessions/{{session_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api", "sessions", "{{session_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "My sessions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/sessions/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api", "sessions", "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Launch session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"server_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/sessions/launch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api", "sessions", "launch"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Kill session",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/sessions/{{session_id}}/kill",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api", "sessions", "{{session_id}}", "kill"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ping session",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/sessions/{{session_id}}/ping",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api", "sessions", "{{session_id}}", "ping"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

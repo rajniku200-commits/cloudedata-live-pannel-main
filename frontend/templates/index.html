@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudeData Live Panel</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#101218;--panel:#181c26;--panel2:#202636;--line:#30384d;--text:#eef2f7;--muted:#9aa6b8;--blue:#2563eb;--green:#16a34a;--amber:#d97706;--red:#dc2626}
+    body{min-height:100vh;background:radial-gradient(circle at top left,#18233d 0,#101218 38%,#0d0f14 100%);color:var(--text);font-family:Inter,Segoe UI,system-ui,sans-serif;display:grid;place-items:center;padding:24px}
+    .shell{width:min(1040px,100%);display:grid;grid-template-columns:1.2fr .8fr;min-height:620px;border:1px solid var(--line);background:rgba(24,28,38,.92);box-shadow:0 24px 80px rgba(0,0,0,.38)}
+    .brand{padding:54px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(140deg,rgba(37,99,235,.18),rgba(22,163,74,.08)),var(--panel)}
+    .mark{display:inline-grid;place-items:center;width:48px;height:48px;border-radius:8px;background:#fff;color:#111827;font-weight:900;margin-bottom:18px}
+    h1{font-size:42px;line-height:1.05;margin-bottom:16px;letter-spacing:0}
+    .brand p{color:var(--muted);font-size:16px;line-height:1.7;max-width:560px}
+    .checks{display:grid;gap:12px;margin-top:34px;color:#cbd5e1;font-size:14px}
+    .check{display:flex;gap:10px;align-items:center}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--green)}
+    .form-panel{padding:42px;background:var(--panel2);border-left:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:24px}
+    .tab{border:0;background:transparent;color:var(--muted);padding:12px;cursor:pointer;font-weight:700}
+    .tab.active{background:var(--blue);color:white}
+    .form-title{font-size:22px;font-weight:800;margin-bottom:6px}
+    .form-sub{color:var(--muted);font-size:14px;margin-bottom:24px}
+    label{display:block;color:#cbd5e1;font-size:13px;font-weight:700;margin-bottom:8px}
+    input{width:100%;height:44px;border:1px solid var(--line);background:#111827;color:var(--text);border-radius:8px;padding:0 12px;font-size:14px;outline:none}
+    input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+    .field{margin-bottom:16px}
+    .submit{width:100%;height:46px;border:0;border-radius:8px;background:var(--green);color:white;font-weight:800;cursor:pointer;margin-top:6px}
+    .submit:disabled{opacity:.55;cursor:wait}
+    .message{min-height:22px;margin-top:16px;font-size:14px;color:var(--muted)}
+    .message.error{color:#fca5a5}.message.success{color:#86efac}
+    .footer{margin-top:28px;color:var(--muted);font-size:12px}
+    @media(max-width:820px){.shell{grid-template-columns:1fr}.brand{padding:32px}.form-panel{border-left:0;border-top:1px solid var(--line);padding:28px}h1{font-size:34px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="brand">
+      <div>
+        <div class="mark">CD</div>
+        <h1>CloudeData Live Panel</h1>
+        <p>Secure portal for launching remote desktop sessions, tracking active connections, and monitoring connected agents from one backend.</p>
+        <div class="checks">
+          <div class="check"><span class="dot"></span><span>Backend API connected through Flask routes</span></div>
+          <div class="check"><span class="dot"></span><span>Session dashboard and server launcher ready</span></div>
+          <div class="check"><span class="dot"></span><span>Socket.IO agent channel available</span></div>
+        </div>
+      </div>
+      <div class="footer">Use your panel account to continue.</div>
+    </section>
+
+    <section class="form-panel">
+      <div class="tabs">
+        <button class="tab active" id="loginTab" onclick="setMode('login')">Login</button>
+        <button class="tab" id="registerTab" onclick="setMode('register')">Register</button>
+      </div>
+      <div class="form-title" id="formTitle">Welcome back</div>
+      <div class="form-sub" id="formSub">Sign in to open your portal.</div>
+      <form id="authForm">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="submit" id="submitBtn" type="submit">Login</button>
+        <div class="message" id="message"></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    let mode = 'login';
+    const form = document.getElementById('authForm');
+    const message = document.getElementById('message');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function setMode(next) {
+      mode = next;
+      document.getElementById('loginTab').classList.toggle('active', mode === 'login');
+      document.getElementById('registerTab').classList.toggle('active', mode === 'register');
+      document.getElementById('formTitle').textContent = mode === 'login' ? 'Welcome back' : 'Create account';
+      document.getElementById('formSub').textContent = mode === 'login' ? 'Sign in to open your portal.' : 'Create a panel user, then sign in.';
+      submitBtn.textContent = mode === 'login' ? 'Login' : 'Register';
+      message.textContent = '';
+      message.className = 'message';
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      submitBtn.disabled = true;
+      message.textContent = '';
+      message.className = 'message';
+
+      const payload = {
+        username: document.getElementById('username').value.trim(),
+        password: document.getElementById('password').value
+      };
+
+      try {
+        const response = await fetch(mode === 'login' ? '/login' : '/register', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Request failed');
+        if (mode === 'register') {
+          message.textContent = 'Account created. Login now.';
+          message.className = 'message success';
+          setMode('login');
+        } else {
+          window.location = data.redirect || '/portal/';
+        }
+      } catch (error) {
+        message.textContent = error.message;
+        message.className = 'message error';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
