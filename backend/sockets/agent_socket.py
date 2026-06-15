@@ -1,9 +1,11 @@
 from flask import request
 from backend.extensions import socketio
 from backend.services.agent_manager import register_agent, set_offline, update_heartbeat
+from backend.services.logger import get_logger
 from backend.services.stream_manager import remove_sid
 
 connected_agents = {}
+logger = get_logger(__name__)
 
 
 def get_agent_sid(agent_id):
@@ -45,20 +47,20 @@ def handle_agent_connect(data):
             "ram": data.get("ram"),
             "status": "online"
         }
-        print(f" [+] Agent Connected: {agent_id} ")
+        logger.info("Agent connected: %s", agent_id)
     else:
-        print("Agent connected without an ID")
+        logger.warning("Agent connected without an ID")
 
 @socketio.on("disconnect", namespace='/agent')
 def handle_agent_disconnect():
     agent_info = connected_agents.pop(request.sid, None)
     for agent_id in remove_sid(request.sid):
-        print(f"[STREAM CLOSED] {agent_id}")
+        logger.info("Stream closed: %s", agent_id)
     if agent_info:
         set_offline(agent_info["agent_id"])
-        print(f" [-] Agent Disconnected: {agent_info['agent_id']} ")
+        logger.info("Agent disconnected: %s", agent_info["agent_id"])
     else:
-        print("An agent disconnected without a known ID")
+        logger.warning("Agent disconnected without a known ID")
 
 @socketio.on("heartbeat", namespace='/agent')
 def handle_heartbeat(data):
@@ -70,5 +72,5 @@ def handle_heartbeat(data):
     for sid, info in connected_agents.items():
         if info["agent_id"] == agent_id:
             connected_agents[sid]["status"] = "online"
-            print(f" [❤️] Heartbeat received from {agent_id} ")
+            logger.debug("Heartbeat received from %s", agent_id)
             break

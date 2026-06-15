@@ -18,7 +18,7 @@ def _current_user_payload():
 
 
 def can_view_stream(user, agent_id):
-    return bool(user and user.is_authenticated and user.has_role('Admin', 'Manager'))
+    return bool(user and user.is_authenticated and user.has_role('Admin', 'Manager', 'Viewer'))
 
 
 def can_control_stream(user, agent_id, action):
@@ -169,10 +169,10 @@ def handle_screen_frame(data):
     if not agent_id or not frame:
         return
 
-    stream_manager.update_frame(agent_id, request.sid, frame)
+    stream = stream_manager.update_frame(agent_id, request.sid, frame)
     socketio.emit(
         'screen_update',
-        {'agent_id': agent_id, 'frame': frame},
+        {'agent_id': agent_id, 'frame': stream.get('last_frame')},
         room=stream_manager.room_name(agent_id),
         namespace='/',
     )

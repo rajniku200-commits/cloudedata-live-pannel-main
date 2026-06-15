@@ -1,4 +1,10 @@
 import paramiko
+
+from backend.services.logger import get_logger
+
+logger = get_logger(__name__)
+
+
 def connect_ssh(host, port, username, password):
     try:
   
@@ -14,5 +20,5 @@ def connect_ssh(host, port, username, password):
         return ssh, None
     except Exception as e:
         error_msg = f"{type(e).__name__}: {str(e)}"
-        print(f"SSH connection error: {error_msg}")
+        logger.error("SSH connection error: %s", error_msg)
         return None, error_msg

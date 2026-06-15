@@ -338,7 +338,7 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-  const INITIAL_SERVERS = {{ servers | tojson }};
+  const INITIAL_SERVERS = {{ servers | tojson}};
   let serversState = [...INITIAL_SERVERS];
   let appsState = [];
   let currentFilter = 'all';
@@ -352,7 +352,7 @@
     loadMySessions();
   });
 
-  /* ─── SECTION NAV ─── */
+
   function showSection(name, navItem) {
     document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
     document.getElementById('section-' + name).style.display = 'block';

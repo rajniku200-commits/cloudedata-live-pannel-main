@@ -1,14 +1,19 @@
 import os
+import secrets
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+from io import BytesIO
 
-from flask import Blueprint, current_app, jsonify, request, send_file
+from flask import Blueprint, current_app, jsonify, request, send_file, url_for
 from flask_login import current_user, login_required
 
 from backend.extensions import db
 from backend.models.activity_log import ActivityLog
+from backend.models.login_link import LoginLink
+from backend.models.user import User
 from backend.models.ticket import ClipboardItem, Ticket
 from backend.services.alerting import send_alert
+from backend.services.logger import recent_error_lines
 from backend.services.monitoring import get_full_status
 from backend.services.stream_manager import stream_manager
 from backend.services.two_factor import generate_secret, provisioning_uri, verify_totp
@@ -209,6 +214,61 @@ def monitoring():
     return jsonify({'success': True, **get_full_status()})
 
 
+@admin_features.route('/error-logs', methods=['GET'])
+@login_required
+def error_logs():
+    if not _manager_required():
+        return jsonify({'success': False, 'error': 'Forbidden'}), 403
+    limit = request.args.get('limit', 100, type=int)
+    return jsonify({'success': True, 'errors': recent_error_lines(current_app, max(1, min(limit, 500)))})
+
+
+@admin_features.route('/generate-url', methods=['POST'])
+@login_required
+def generate_url():
+    if not _admin_required():
+        return jsonify({'success': False, 'error': 'Forbidden'}), 403
+    payload = _data()
+    user = User.get_by_id(payload.get('user_id')) if payload.get('user_id') else None
+    expires_minutes = int(payload.get('expires_minutes') or 60)
+    token = secrets.token_urlsafe(32)
+    link = LoginLink(
+        token=token,
+        user_id=user.id if user else None,
+        expires_at=datetime.utcnow() + timedelta(minutes=max(1, expires_minutes)),
+        one_time=_as_bool(payload.get('one_time'), True),
+        created_by=current_user.id,
+    )
+    db.session.add(link)
+    db.session.commit()
+    login_url = url_for('auth.login_link', token=token, _external=True)
+    ActivityLog.log(current_user.id, f'login_link_created #{link.id}', 'url', ip_address=request.remote_addr)
+    return jsonify({'success': True, 'url': login_url, 'link': link.to_dict(), 'qr_code': _qr_data_url(login_url)}), 201
+
+
+@admin_features.route('/login-links', methods=['GET'])
+@login_required
+def login_links():
+    if not _admin_required():
+        return jsonify({'success': False, 'error': 'Forbidden'}), 403
+    links = LoginLink.query.order_by(LoginLink.created_at.desc()).limit(100).all()
+    return jsonify({'success': True, 'links': [link.to_dict() for link in links]})
+
+
+@admin_features.route('/login-links/<int:link_id>/revoke', methods=['POST', 'DELETE'])
+@login_required
+def revoke_login_link(link_id):
+    if not _admin_required():
+        return jsonify({'success': False, 'error': 'Forbidden'}), 403
+    link = db.session.get(LoginLink, link_id)
+    if not link:
+        return jsonify({'success': False, 'error': 'Login link not found'}), 404
+    link.revoked_at = datetime.utcnow()
+    db.session.commit()
+    ActivityLog.log(current_user.id, f'login_link_revoked #{link.id}', 'url', ip_address=request.remote_addr)
+    return jsonify({'success': True, 'link': link.to_dict()})
+
+
 @admin_features.route('/alerts/test', methods=['POST'])
 @login_required
 def test_alert():
@@ -255,6 +315,27 @@ def _transfer_dir():
     path = os.path.join(current_app.instance_path, 'transfers')
     os.makedirs(path, exist_ok=True)
     return path
+
+
+def _as_bool(value, default=True):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def _qr_data_url(value):
+    try:
+        import base64
+        import qrcode
+
+        image = qrcode.make(value)
+        buffer = BytesIO()
+        image.save(buffer, format='PNG')
+        return 'data:image/png;base64,' + base64.b64encode(buffer.getvalue()).decode('ascii')
+    except Exception:
+        return None
 
 
 def _recording_dir():

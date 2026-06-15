@@ -9,8 +9,10 @@ from backend.models.session import Session
 from backend.models.rdp_session import RdpSession
 from backend.models.activity_log import ActivityLog
 from backend.models.agent import Agent
+from backend.models.login_link import LoginLink
 from backend.models.published_app import ApplicationAssignment, PublishedApp
 from backend.models.ticket import ClipboardItem, Ticket
+from backend.services.logger import configure_logging
 
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -32,6 +34,7 @@ app.config.setdefault('SQLALCHEMY_DATABASE_URI', os.getenv('DATABASE_URI', 'sqli
 app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', False)
 
 os.makedirs(app.instance_path, exist_ok=True)
+configure_logging(app)
 
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
@@ -45,6 +48,12 @@ with app.app_context():
         user_columns = {column['name'] for column in inspector.get_columns('users')}
         if 'role' not in user_columns:
             db.session.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'User'"))
+            db.session.commit()
+        if 'is_active' not in user_columns:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT 1"))
+            db.session.commit()
+        if 'last_login_at' not in user_columns:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN last_login_at DATETIME"))
             db.session.commit()
         if 'two_factor_enabled' not in user_columns:
             db.session.execute(text("ALTER TABLE users ADD COLUMN two_factor_enabled BOOLEAN NOT NULL DEFAULT 0"))
@@ -115,6 +124,12 @@ def test():
 def test_socket():
     socketio.emit('message', {'data': 'Hello from the server!'})
     return 'Socket test emitted'
+
+
+@app.errorhandler(Exception)
+def log_unhandled_exception(error):
+    app.logger.exception('Unhandled exception')
+    raise error
 
 @login_manager.user_loader
 def load_user(user_id):

@@ -12,3 +12,4 @@ mss
 opencv-python-headless
 numpy
 pyautogui
+qrcode[pil]>=7.4.2

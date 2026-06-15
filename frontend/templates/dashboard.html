@@ -17,8 +17,9 @@
     .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:800}.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
     .section{display:none}.section.active{display:block}.layout{display:grid;grid-template-columns:400px 1fr;gap:18px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px}.panel h2{font-size:18px;margin-bottom:12px}.hint{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:16px}
     .field{margin-bottom:13px}label{display:block;color:#cbd5e1;font-size:12px;font-weight:800;margin-bottom:7px}input,select,textarea{width:100%;border:1px solid var(--line);background:#111827;color:var(--text);border-radius:8px;padding:10px 12px;font-size:14px;outline:none}textarea{min-height:72px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.message{min-height:22px;color:var(--muted);font-size:13px;margin-top:12px}.message.error{color:#fca5a5}.message.success{color:#86efac}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions,.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar{margin-bottom:12px}.message{min-height:22px;color:var(--muted);font-size:13px;margin-top:12px}.message.error{color:#fca5a5}.message.success{color:#86efac}
     .table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}.table th{color:var(--muted);background:#141824;text-transform:uppercase;font-size:12px}.badge{display:inline-flex;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800}.online,.active,.open{background:rgba(22,163,74,.15);color:#86efac}.offline,.closed{background:rgba(154,166,184,.15);color:#cbd5e1}.error,.critical{background:rgba(220,38,38,.15);color:#fca5a5}.normal{background:rgba(37,99,235,.15);color:#93c5fd}.empty{padding:34px;text-align:center;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px}.mini{color:var(--muted);font-size:12px;margin-top:3px}.stack{display:grid;gap:14px}.wide{grid-column:1/-1}.code{white-space:pre-wrap;font-family:Consolas,monospace;font-size:12px;background:#0b1020;border:1px solid var(--line);border-radius:8px;padding:12px;max-height:260px;overflow:auto}
+    .stream-modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}.stream-modal.show{display:flex}.stream-shell{width:min(1180px,96vw);background:#0b1020;border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}.stream-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--panel);border-bottom:1px solid var(--line)}.stream-title{font-weight:800}.stream-stage{height:min(72vh,760px);background:#05070d;display:grid;place-items:center;outline:none;position:relative}.stream-stage img{max-width:100%;max-height:100%;object-fit:contain;display:block}.stream-placeholder{position:absolute;color:var(--muted);text-align:center;padding:20px}.stream-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.stream-status{color:var(--muted);font-size:12px;padding:10px 14px;border-top:1px solid var(--line);background:#0b1020}
     @media(max-width:960px){.grid,.layout{grid-template-columns:1fr}.title{align-items:start;flex-direction:column}header{padding:0 16px}main{padding:18px}.row{grid-template-columns:1fr}}
   </style>
 </head>
@@ -58,6 +59,7 @@
       <button class="tab" onclick="showTab('transfers', this)">Files</button>
       <button class="tab" onclick="showTab('tickets', this)">Tickets</button>
       <button class="tab" onclick="showTab('security', this)">Security</button>
+      <button class="tab" onclick="showTab('links', this)">Login URLs</button>
       <button class="tab" onclick="showTab('audit', this)">Audit</button>
     </div>
 
@@ -68,11 +70,23 @@
           <p class="hint">This creates the login ID and password the client will use on the URL or desktop launcher.</p>
           <div class="field"><label>Username</label><input name="username" required></div>
           <div class="field"><label>Password</label><input name="password" type="password" required></div>
-          <div class="field"><label>Role</label><select name="role"><option>User</option><option>Manager</option><option>Admin</option></select></div>
+          <div class="field"><label>Role</label><select name="role"><option>User</option><option>Viewer</option><option>Manager</option><option>Admin</option><option>Super Admin</option></select></div>
           <button class="btn green" type="submit">Create User</button>
           <div class="message" id="userMsg"></div>
         </form>
-        <div id="usersTable"></div>
+        <div>
+          <div class="toolbar">
+            <input id="userSearch" placeholder="Search users" oninput="renderUsers()">
+            <select id="userStatusFilter" onchange="renderUsers()"><option value="all">All users</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+            <select id="userLastLoginFilter" onchange="renderUsers()"><option value="all">Any login</option><option value="never">Never logged in</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select>
+            <button class="btn" onclick="bulkDeleteUsers()">Bulk Delete</button>
+          </div>
+          <form class="toolbar" id="userImportForm">
+            <input name="file" type="file" accept=".csv" required>
+            <button class="btn" type="submit">Import CSV</button>
+          </form>
+          <div id="usersTable"></div>
+        </div>
       </div>
     </section>
 
@@ -110,7 +124,14 @@
           <button class="btn green" type="submit">Publish</button>
           <div class="message" id="appMsg"></div>
         </form>
-        <div id="appsTable"></div>
+        <div>
+          <form class="toolbar" id="softwareUploadForm">
+            <input name="file" type="file" accept=".exe,.msi,.bat,.cmd" required>
+            <button class="btn" type="submit">Upload EXE</button>
+          </form>
+          <div class="message" id="softwareUploadMsg"></div>
+          <div id="appsTable"></div>
+        </div>
       </div>
     </section>
 
@@ -119,7 +140,7 @@
         <form class="panel" id="assignForm">
           <h2>Assign to user</h2>
           <p class="hint">After assignment, the item appears as an icon in that user's floating launcher after login.</p>
-          <div class="field"><label>User</label><select name="user_id" id="assignUserSelect" required></select></div>
+          <div class="field"><label>User</label><select name="user_id" id="assignUserSelect" onchange="loadUserAssignments(this.value)" required></select></div>
           <div class="field"><label>App or folder</label><select name="app_id" id="assignAppSelect" required></select></div>
           <button class="btn green" type="submit">Assign</button>
           <div class="message" id="assignMsg"></div>
@@ -214,17 +235,65 @@
     <section class="section" id="tab-audit">
       <div id="auditTable"></div>
     </section>
+
+    <section class="section" id="tab-links">
+      <div class="layout">
+        <form class="panel" id="loginLinkForm">
+          <h2>Generate login URL</h2>
+          <div class="field"><label>User</label><select name="user_id" id="linkUserSelect"></select></div>
+          <div class="row">
+            <div class="field"><label>Expiry minutes</label><input name="expires_minutes" type="number" value="60" min="1"></div>
+            <div class="field"><label>One-time</label><select name="one_time"><option value="true">Yes</option><option value="false">No</option></select></div>
+          </div>
+          <button class="btn green" type="submit">Generate URL</button>
+          <div class="message" id="loginLinkMsg"></div>
+          <pre class="code" id="generatedLoginLink"></pre>
+        </form>
+        <div id="loginLinksTable"></div>
+      </div>
+    </section>
   </main>
 
+  <div class="stream-modal" id="streamModal">
+    <div class="stream-shell">
+      <div class="stream-top">
+        <div>
+          <div class="stream-title" id="streamTitle">Live stream</div>
+          <div class="mini" id="streamAgentMeta">No agent selected</div>
+        </div>
+        <div class="stream-controls">
+          <select id="streamQuality">
+            <option value="55">Balanced</option>
+            <option value="75">High quality</option>
+            <option value="35">Low bandwidth</option>
+          </select>
+          <button class="btn green" onclick="startStream()">Start</button>
+          <button class="btn" onclick="stopStream()">Stop</button>
+          <button class="btn" onclick="closeStreamViewer()">Close</button>
+        </div>
+      </div>
+      <div class="stream-stage" id="streamStage" tabindex="0">
+        <div class="stream-placeholder" id="streamPlaceholder">Start the stream to view this agent.</div>
+        <img id="streamImage" alt="Live agent screen">
+      </div>
+      <div class="stream-status" id="streamStatus">Disconnected</div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     const initialServers = {{ servers | tojson }};
     let users = [];
     let servers = [...initialServers];
     let apps = [];
     let sessions = [];
+    let streamSocket = null;
+    let selectedStreamAgent = null;
+    let lastStreamFrameAt = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       bindForms();
+      initStreamSocket();
       refresh();
     });
 
@@ -233,11 +302,14 @@
       document.getElementById('serverForm').addEventListener('submit', submitServer);
       document.getElementById('appForm').addEventListener('submit', submitApp);
       document.getElementById('assignForm').addEventListener('submit', submitAssign);
+      document.getElementById('userImportForm').addEventListener('submit', submitUserImport);
+      document.getElementById('softwareUploadForm').addEventListener('submit', submitSoftwareUpload);
       document.getElementById('ticketForm').addEventListener('submit', submitTicket);
       document.getElementById('transferForm').addEventListener('submit', submitTransfer);
       document.getElementById('twoFactorForm').addEventListener('submit', enable2fa);
       document.getElementById('clipboardForm').addEventListener('submit', submitClipboard);
       document.getElementById('alertForm').addEventListener('submit', submitAlert);
+      document.getElementById('loginLinkForm').addEventListener('submit', submitLoginLink);
     }
 
     function showTab(name, button) {
@@ -248,7 +320,7 @@
     }
 
     async function refresh() {
-      await Promise.all([loadUsers(), loadServers(), loadApps(), loadStats(), loadSessions(), loadAgents(), loadMonitoring(), loadTransfers(), loadTickets(), loadClipboard(), loadAudit()]);
+      await Promise.all([loadUsers(), loadServers(), loadApps(), loadStats(), loadSessions(), loadAgents(), loadMonitoring(), loadTransfers(), loadTickets(), loadClipboard(), loadAudit(), loadLoginLinks(), loadErrorLogs()]);
       renderAll();
     }
 
@@ -282,13 +354,15 @@
       sessions = data.sessions || [];
     }
 
-    let agents = [], monitoring = {}, transfers = [], tickets = [], clipboardItems = [], auditLogs = [];
+    let agents = [], monitoring = {}, transfers = [], tickets = [], clipboardItems = [], auditLogs = [], loginLinks = [], selectedUserAssignments = null, errorLogs = [];
     async function loadAgents(){ agents = await fetchJson('/agents', []); }
     async function loadMonitoring(){ monitoring = await fetchJson('/api/monitoring', {}); }
     async function loadTransfers(){ transfers = (await fetchJson('/api/transfers', {})).files || []; }
     async function loadTickets(){ tickets = (await fetchJson('/api/tickets?status=all', {})).tickets || []; }
     async function loadClipboard(){ clipboardItems = (await fetchJson('/api/clipboard', {})).items || []; }
     async function loadAudit(){ auditLogs = await fetchJson('/logs', []); }
+    async function loadLoginLinks(){ loginLinks = (await fetchJson('/api/login-links', {})).links || []; }
+    async function loadErrorLogs(){ errorLogs = (await fetchJson('/api/error-logs', {})).errors || []; }
 
     function renderAll() {
       document.getElementById('countUsers').textContent = users.length;
@@ -305,6 +379,7 @@
       renderTickets();
       renderClipboard();
       renderAudit();
+      renderLoginLinks();
       fillSelects();
     }
 
@@ -312,6 +387,7 @@
       fillSelect('appServerSelect', servers, item => item.id, item => `${item.name} (${item.ip_address})`);
       fillSelect('assignUserSelect', users, item => item.id, item => `${item.username} (${item.role})`);
       fillSelect('assignAppSelect', apps, item => item.id, item => item.name);
+      fillSelect('linkUserSelect', users, item => item.id, item => `${item.username} (${item.role})`);
     }
 
     function fillSelect(id, items, valueFn, textFn) {
@@ -321,11 +397,31 @@
 
     function renderUsers() {
       const host = document.getElementById('usersTable');
-      if (!users.length) return host.innerHTML = '<div class="empty">No users yet.</div>';
-      host.innerHTML = table(['ID','Username','Role'], users.map(user => [
+      const search = document.getElementById('userSearch').value.toLowerCase();
+      const status = document.getElementById('userStatusFilter').value;
+      const lastLogin = document.getElementById('userLastLoginFilter').value;
+      const now = Date.now();
+      const filtered = users.filter(user => {
+        if (search && !user.username.toLowerCase().includes(search)) return false;
+        if (status === 'active' && !user.is_active) return false;
+        if (status === 'inactive' && user.is_active) return false;
+        if (lastLogin === 'never' && user.last_login_at) return false;
+        if (lastLogin !== 'all' && lastLogin !== 'never') {
+          if (!user.last_login_at) return false;
+          const ageDays = (now - new Date(user.last_login_at).getTime()) / 86400000;
+          if (ageDays > Number(lastLogin)) return false;
+        }
+        return true;
+      });
+      if (!filtered.length) return host.innerHTML = '<div class="empty">No users match the current filters.</div>';
+      host.innerHTML = table(['','ID','Username','Role','Status','Last Login','Actions'], filtered.map(user => [
+        `<input type="checkbox" class="userBulk" value="${user.id}">`,
         `#${user.id}`,
         escapeHtml(user.username),
-        `<span class="badge active">${escapeHtml(user.role)}</span>`
+        `<span class="badge active">${escapeHtml(user.role)}</span>`,
+        `<span class="badge ${user.is_active ? 'online':'offline'}">${user.is_active ? 'Active':'Inactive'}</span>`,
+        formatDate(user.last_login_at),
+        `<button class="btn" onclick="editUser(${user.id})">Edit</button> <button class="btn" onclick="deleteUser(${user.id})">Delete</button>`
       ]));
     }
 
@@ -343,12 +439,13 @@
     function renderApps() {
       const host = document.getElementById('appsTable');
       if (!apps.length) return host.innerHTML = '<div class="empty">No apps or folders published yet.</div>';
-      host.innerHTML = table(['Name','Server','Mode','Target','Assigned'], apps.map(app => [
+      host.innerHTML = table(['Name','Server','Mode','Target','Assigned','Actions'], apps.map(app => [
         `<b>${escapeHtml(app.name)}</b><div class="mini">${escapeHtml(app.description || '')}</div>`,
         escapeHtml((app.server && app.server.name) || `#${app.server_id}`),
         escapeHtml(app.launch_mode),
         escapeHtml(app.remote_app_program || app.initial_program || 'Desktop'),
-        (app.assigned_user_ids || []).length
+        (app.assigned_user_ids || []).length,
+        `<button class="btn" onclick="editApp(${app.id})">Edit</button> <button class="btn" onclick="deleteApp(${app.id})">Delete</button>`
       ]));
     }
 
@@ -366,6 +463,9 @@
         });
       });
       host.innerHTML = rows.length ? table(['User','Assigned item','Action'], rows) : '<div class="empty">No assignments yet.</div>';
+      if (selectedUserAssignments) {
+        host.innerHTML += `<div class="panel" style="margin-top:12px"><h2>${escapeHtml(selectedUserAssignments.user.username)} assigned software</h2>${selectedUserAssignments.assigned_app_ids.length ? selectedUserAssignments.assigned_app_ids.map(id => escapeHtml((apps.find(app => app.id === id) || {}).name || `App #${id}`)).join('<br>') : '<div class="mini">No software assigned to this user.</div>'}</div>`;
+      }
     }
 
     function renderSessions() {
@@ -385,22 +485,24 @@
     function renderAgents() {
       const host = document.getElementById('agentsTable');
       if (!agents.length) return host.innerHTML = '<div class="empty">No agents online yet.</div>';
-      host.innerHTML = table(['Agent','Host','User','Status','Recording'], agents.map(agent => [
+      host.innerHTML = table(['Agent','Host','User','Status','Live Stream','Recording'], agents.map(agent => [
         escapeHtml(agent.agent_id),
         `<b>${escapeHtml(agent.hostname || '')}</b><div class="mini">${escapeHtml(agent.ip_address || '')}</div>`,
         escapeHtml(agent.username || ''),
         `<span class="badge ${agent.status === 'online' ? 'online':'offline'}">${escapeHtml(agent.status)}</span>`,
+        `<button class="btn green" onclick="openStreamViewer('${escapeAttr(agent.agent_id)}')">Open</button> <button class="btn" onclick="quickStartStream('${escapeAttr(agent.agent_id)}')">Start</button> <button class="btn" onclick="quickStopStream('${escapeAttr(agent.agent_id)}')">Stop</button>`,
         `<button class="btn" onclick="startRecording('${escapeAttr(agent.agent_id)}')">Start</button> <button class="btn" onclick="stopRecording('${escapeAttr(agent.agent_id)}')">Stop</button>`
       ]));
     }
 
     function renderMonitoring() {
       const health = monitoring.health || {};
-      document.getElementById('healthCards').innerHTML = ['cpu_percent','memory_percent','disk_percent'].map(key => `<div class="card"><div class="label">${escapeHtml(key.replace('_',' '))}</div><div class="value">${health[key] ?? '-' }%</div></div>`).join('');
+      document.getElementById('healthCards').innerHTML = ['cpu_percent','memory_percent','disk_percent'].map(key => `<div class="card"><div class="label">${escapeHtml(key.replace('_',' '))}</div><div class="value">${health[key] ?? '-' }%</div></div>`).join('') + `<div class="card"><div class="label">Network</div><div class="value">${health.network_recv_mb ?? '-'} MB</div><div class="mini">received / ${health.network_sent_mb ?? '-'} MB sent</div></div><div class="card"><div class="label">Agents</div><div class="value">${(monitoring.agents && monitoring.agents.online) || 0}</div><div class="mini">online of ${((monitoring.agents && monitoring.agents.total) || 0)}</div></div>`;
       const docker = (monitoring.docker && monitoring.docker.containers) || [];
       document.getElementById('dockerTable').innerHTML = docker.length ? table(['Docker container','Image','Status'], docker.map(item => [escapeHtml(item.name), escapeHtml(item.image), escapeHtml(item.status)])) : '<div class="empty">Docker monitoring unavailable or no containers.</div>';
       const pods = (monitoring.kubernetes && monitoring.kubernetes.pods) || [];
       document.getElementById('kubeTable').innerHTML = pods.length ? table(['Namespace','Pod','Ready','Status','Node'], pods.map(item => [escapeHtml(item.namespace), escapeHtml(item.name), escapeHtml(item.ready), escapeHtml(item.status), escapeHtml(item.node)])) : '<div class="empty">Kubernetes monitoring unavailable or no pods.</div>';
+      document.getElementById('kubeTable').innerHTML += errorLogs.length ? `<div class="panel" style="margin-top:14px"><h2>Error Logs</h2><pre class="code">${escapeHtml(errorLogs.join('\n'))}</pre></div>` : '';
     }
 
     function renderTransfers() {
@@ -423,10 +525,52 @@
       host.innerHTML = auditLogs.length ? table(['Time','User','Action','Category'], auditLogs.map(log => [formatDate(log.timestamp || log.time), log.user_id || '-', escapeHtml(log.action), escapeHtml(log.category || '')])) : '<div class="empty">No audit log entries yet.</div>';
     }
 
+    function renderLoginLinks() {
+      const host = document.getElementById('loginLinksTable');
+      host.innerHTML = loginLinks.length ? table(['User','Expires','One-time','Status','Actions'], loginLinks.map(link => [
+        escapeHtml(link.username || '-'),
+        formatDate(link.expires_at),
+        link.one_time ? 'Yes' : 'No',
+        `<span class="badge ${link.is_valid ? 'online':'offline'}">${link.is_valid ? 'Valid':'Inactive'}</span>`,
+        `<button class="btn" onclick="revokeLoginLink(${link.id})">Revoke</button>`
+      ])) : '<div class="empty">No login URLs generated yet.</div>';
+    }
+
     async function submitUser(event) {
       event.preventDefault();
       const payload = formPayload(event.target);
       await postJson('/users', payload, 'userMsg', event.target);
+    }
+
+    async function editUser(id) {
+      const user = users.find(item => item.id === id);
+      const username = prompt('Username', user.username);
+      if (!username) return;
+      const role = prompt('Role', user.role) || user.role;
+      const status = (prompt('Status: active or inactive', user.is_active ? 'active' : 'inactive') || '').toLowerCase();
+      const isActive = status !== 'inactive';
+      await postJson(`/users/${id}`, {username, role, is_active: isActive}, 'userMsg', document.getElementById('userForm'));
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('Delete this user?')) return;
+      await fetch(`/users/${id}`, {method:'DELETE'});
+      await refresh();
+    }
+
+    async function bulkDeleteUsers() {
+      const user_ids = Array.from(document.querySelectorAll('.userBulk:checked')).map(item => item.value);
+      if (!user_ids.length || !confirm(`Delete ${user_ids.length} selected users?`)) return;
+      await postJson('/users/bulk-delete', {user_ids}, 'userMsg', document.getElementById('userForm'));
+    }
+
+    async function submitUserImport(event) {
+      event.preventDefault();
+      const response = await fetch('/users/import-csv', {method:'POST', body:new FormData(event.target)});
+      const data = await response.json();
+      document.getElementById('userMsg').textContent = data.message || 'Import complete';
+      event.target.reset();
+      await refresh();
     }
 
     async function submitServer(event) {
@@ -458,6 +602,31 @@
       await postJson('/api/apps', payload, 'appMsg', form);
     }
 
+    async function editApp(id) {
+      const app = apps.find(item => item.id === id);
+      const name = prompt('Software name', app.name);
+      if (!name) return;
+      const description = prompt('Description', app.description || '') || '';
+      await postJson(`/api/apps/${id}`, {name, description, is_active: app.is_active}, 'appMsg', document.getElementById('appForm'));
+    }
+
+    async function deleteApp(id) {
+      if (!confirm('Delete this software?')) return;
+      await fetch(`/api/apps/${id}`, {method:'DELETE'});
+      await refresh();
+    }
+
+    async function submitSoftwareUpload(event) {
+      event.preventDefault();
+      const msg = document.getElementById('softwareUploadMsg');
+      msg.textContent = 'Uploading...';
+      const response = await fetch('/api/apps/upload', {method:'POST', body:new FormData(event.target)});
+      const data = await response.json();
+      msg.textContent = data.error || (data.file ? `Uploaded: ${data.file.name}` : 'Upload complete');
+      msg.className = response.ok ? 'message success' : 'message error';
+      event.target.reset();
+    }
+
     async function submitAssign(event) {
       event.preventDefault();
       const data = formPayload(event.target);
@@ -469,10 +638,24 @@
       await refresh();
     }
 
+    async function loadUserAssignments(userId) {
+      selectedUserAssignments = userId ? await fetchJson(`/api/apps/assignments/user/${userId}`, null) : null;
+      renderAssignments();
+    }
+
     async function submitTicket(event) { event.preventDefault(); await postJson('/api/tickets', formPayload(event.target), 'ticketMsg', event.target); }
     async function closeTicket(id) { await fetch(`/api/tickets/${id}`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:'closed'})}); await refresh(); }
     async function submitClipboard(event) { event.preventDefault(); await postJson('/api/clipboard', formPayload(event.target), 'clipboardMsg', event.target); }
     async function submitAlert(event) { event.preventDefault(); await postJson('/api/alerts/test', formPayload(event.target), 'alertMsg', event.target); }
+    async function submitLoginLink(event) {
+      event.preventDefault();
+      const response = await fetch('/api/generate-url', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(formPayload(event.target))});
+      const data = await response.json();
+      document.getElementById('loginLinkMsg').textContent = data.error || data.message || (data.url ? 'Generated' : 'Request failed');
+      document.getElementById('generatedLoginLink').textContent = data.url || '';
+      await refresh();
+    }
+    async function revokeLoginLink(id) { await fetch(`/api/login-links/${id}/revoke`, {method:'POST'}); await refresh(); }
     async function submitTransfer(event) {
       event.preventDefault();
       const msg = document.getElementById('transferMsg');
@@ -496,6 +679,161 @@
     }
     async function startRecording(agentId) { await fetch(`/api/recordings/${encodeURIComponent(agentId)}/start`, {method:'POST'}); await refresh(); }
     async function stopRecording(agentId) { await fetch(`/api/recordings/${encodeURIComponent(agentId)}/stop`, {method:'POST'}); await refresh(); }
+
+    function initStreamSocket() {
+      if (typeof io === 'undefined') {
+        setStreamStatus('Socket.IO client script did not load.');
+        return;
+      }
+      streamSocket = io('/', {transports: ['websocket', 'polling']});
+      streamSocket.on('connect', () => setStreamStatus('Stream socket connected.'));
+      streamSocket.on('disconnect', () => setStreamStatus('Stream socket disconnected.'));
+      streamSocket.on('connect_error', error => setStreamStatus(`Stream socket error: ${error.message || error}`));
+      streamSocket.on('viewer_stream_result', data => {
+        if (!data.success) setStreamStatus(data.error || 'Unable to join stream.');
+        else setStreamStatus(`Joined ${data.agent_id}. Waiting for frames...`);
+      });
+      streamSocket.on('stream_control_result', data => {
+        setStreamStatus(data.error || `${data.action || 'stream'} command sent for ${data.agent_id}`);
+      });
+      streamSocket.on('stream_status_result', data => {
+        if (!data.success) setStreamStatus(data.error || 'Unable to read stream status.');
+      });
+      streamSocket.on('screen_error', data => {
+        if (!selectedStreamAgent || data.agent_id === selectedStreamAgent) {
+          setStreamStatus(data.error || 'Agent reported a screen capture error.');
+        }
+      });
+      streamSocket.on('screen_update', data => {
+        if (!selectedStreamAgent || data.agent_id !== selectedStreamAgent) return;
+        const image = document.getElementById('streamImage');
+        image.src = data.frame;
+        lastStreamFrameAt = new Date();
+        document.getElementById('streamPlaceholder').style.display = 'none';
+        setStreamStatus(`Receiving frames. Last frame ${lastStreamFrameAt.toLocaleTimeString()}`);
+      });
+      wireStreamInput();
+    }
+
+    function openStreamViewer(agentId) {
+      selectedStreamAgent = agentId;
+      const agent = agents.find(item => item.agent_id === agentId) || {};
+      document.getElementById('streamTitle').textContent = `Live stream: ${agent.hostname || agentId}`;
+      document.getElementById('streamAgentMeta').textContent = `${agent.username || ''} ${agent.ip_address || ''}`.trim() || agentId;
+      document.getElementById('streamImage').removeAttribute('src');
+      document.getElementById('streamPlaceholder').style.display = 'block';
+      document.getElementById('streamModal').classList.add('show');
+      document.getElementById('streamStage').focus();
+      if (streamSocket) {
+        streamSocket.emit('viewer_join_stream', {agent_id: agentId});
+        streamSocket.emit('stream_status', {agent_id: agentId});
+      }
+    }
+
+    function closeStreamViewer() {
+      if (streamSocket && selectedStreamAgent) {
+        streamSocket.emit('viewer_leave_stream', {agent_id: selectedStreamAgent});
+      }
+      selectedStreamAgent = null;
+      document.getElementById('streamModal').classList.remove('show');
+    }
+
+    function streamSettings() {
+      const quality = Number(document.getElementById('streamQuality').value || 55);
+      return {fps: 12, quality, width: 1280, height: 720};
+    }
+
+    function startStream() {
+      if (!streamSocket || !selectedStreamAgent) return;
+      streamSocket.emit('admin_start_agent_stream', {agent_id: selectedStreamAgent, settings: streamSettings()});
+      setStreamStatus('Starting stream...');
+    }
+
+    function stopStream() {
+      if (!streamSocket || !selectedStreamAgent) return;
+      streamSocket.emit('admin_stop_agent_stream', {agent_id: selectedStreamAgent});
+      setStreamStatus('Stopping stream...');
+    }
+
+    function quickStartStream(agentId) {
+      openStreamViewer(agentId);
+      setTimeout(startStream, 100);
+    }
+
+    function quickStopStream(agentId) {
+      if (!streamSocket) return;
+      streamSocket.emit('admin_stop_agent_stream', {agent_id: agentId});
+    }
+
+    function wireStreamInput() {
+      const stage = document.getElementById('streamStage');
+      stage.addEventListener('mousemove', event => sendMouseEvent(event, 'move'));
+      stage.addEventListener('mousedown', event => {
+        stage.focus();
+        sendMouseEvent(event, event.detail >= 2 ? 'double_click' : 'down');
+      });
+      stage.addEventListener('mouseup', event => sendMouseEvent(event, 'up'));
+      stage.addEventListener('contextmenu', event => {
+        event.preventDefault();
+        sendMouseEvent(event, 'right_click');
+      });
+      stage.addEventListener('wheel', event => {
+        event.preventDefault();
+        sendMouseEvent(event, 'scroll', {scroll_y: event.deltaY > 0 ? -4 : 4});
+      }, {passive: false});
+      stage.addEventListener('keydown', event => {
+        if (!selectedStreamAgent || !streamSocket) return;
+        event.preventDefault();
+        const key = normalizeKey(event.key);
+        if (event.ctrlKey || event.altKey || event.metaKey) {
+          const keys = [];
+          if (event.ctrlKey) keys.push('ctrl');
+          if (event.altKey) keys.push('alt');
+          if (event.metaKey) keys.push('win');
+          if (key && !['control','alt','meta'].includes(key)) keys.push(key);
+          streamSocket.emit('viewer_keyboard_event', {agent_id: selectedStreamAgent, action: 'hotkey', keys});
+        } else if (event.key.length === 1) {
+          streamSocket.emit('viewer_keyboard_event', {agent_id: selectedStreamAgent, action: 'write', text: event.key});
+        } else {
+          streamSocket.emit('viewer_keyboard_event', {agent_id: selectedStreamAgent, action: 'press', key});
+        }
+      });
+    }
+
+    function sendMouseEvent(event, action, extra) {
+      if (!selectedStreamAgent || !streamSocket) return;
+      const coords = remoteCoordinates(event);
+      if (!coords) return;
+      streamSocket.emit('viewer_mouse_event', {
+        agent_id: selectedStreamAgent,
+        action,
+        button: event.button === 2 ? 'right' : 'left',
+        x: coords.x,
+        y: coords.y,
+        ...(extra || {})
+      });
+    }
+
+    function remoteCoordinates(event) {
+      const image = document.getElementById('streamImage');
+      if (!image.src) return null;
+      const rect = image.getBoundingClientRect();
+      const width = image.naturalWidth || 1280;
+      const height = image.naturalHeight || 720;
+      const x = Math.round((event.clientX - rect.left) * (width / rect.width));
+      const y = Math.round((event.clientY - rect.top) * (height / rect.height));
+      return {x: Math.max(0, Math.min(width - 1, x)), y: Math.max(0, Math.min(height - 1, y))};
+    }
+
+    function normalizeKey(key) {
+      const map = {Enter: 'enter', Escape: 'esc', Backspace: 'backspace', Tab: 'tab', Delete: 'delete', ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', ' ': 'space', Control: 'control', Alt: 'alt', Meta: 'meta'};
+      return map[key] || String(key || '').toLowerCase();
+    }
+
+    function setStreamStatus(message) {
+      const host = document.getElementById('streamStatus');
+      if (host) host.textContent = message;
+    }
 
     async function fetchJson(url, fallback, options) {
       try {

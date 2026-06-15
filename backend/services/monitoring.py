@@ -4,10 +4,13 @@ from datetime import datetime
 
 import psutil
 
+from backend.models.agent import Agent
+
 
 def get_server_health():
     disk = psutil.disk_usage('/')
     memory = psutil.virtual_memory()
+    network = psutil.net_io_counters()
     return {
         'timestamp': datetime.utcnow().isoformat(),
         'cpu_percent': psutil.cpu_percent(interval=0.2),
@@ -17,7 +20,27 @@ def get_server_health():
         'disk_percent': disk.percent,
         'disk_used_gb': round(disk.used / (1024 ** 3), 2),
         'disk_total_gb': round(disk.total / (1024 ** 3), 2),
+        'network_sent_mb': round(network.bytes_sent / (1024 ** 2), 2),
+        'network_recv_mb': round(network.bytes_recv / (1024 ** 2), 2),
         'boot_time': datetime.utcfromtimestamp(psutil.boot_time()).isoformat(),
+    }
+
+
+def get_agent_status():
+    rows = Agent.query.order_by(Agent.last_seen.desc()).limit(100).all()
+    return {
+        'total': len(rows),
+        'online': sum(1 for agent in rows if agent.status == 'online'),
+        'offline': sum(1 for agent in rows if agent.status != 'online'),
+        'agents': [
+            {
+                'agent_id': agent.agent_id,
+                'hostname': agent.hostname,
+                'status': agent.status,
+                'last_seen': agent.last_seen.isoformat() if agent.last_seen else None,
+            }
+            for agent in rows
+        ],
     }
 
 
@@ -50,6 +73,7 @@ def get_kubernetes_status():
 def get_full_status():
     return {
         'health': get_server_health(),
+        'agents': get_agent_status(),
         'docker': get_docker_status(),
         'kubernetes': get_kubernetes_status(),
     }

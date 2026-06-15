@@ -1,3 +1,4 @@
+import base64
 import time
 import threading
 
@@ -64,65 +65,62 @@ class ScreenAgent:
             self.streaming = False
             return
 
-        with mss.mss() as sct:
+        try:
+            with mss.mss() as sct:
+                if len(sct.monitors) < 2:
+                    raise RuntimeError('No primary monitor found for screen capture')
 
-            monitor = sct.monitors[1]
+                monitor = sct.monitors[1]
 
-            while self.streaming:
+                while self.streaming:
+                    start_time = time.time()
 
-                start_time = time.time()
+                    image = sct.grab(monitor)
+                    frame = np.array(image)
 
-
-                # Screen Capture
-                image = sct.grab(monitor)
-
-                frame = np.array(image)
-
-                frame = cv2.cvtColor(
-                    frame,
-                    cv2.COLOR_BGRA2BGR
-                )
-
-
-                # Resize for performance
-                frame = cv2.resize(
-                    frame,
-                    (
-                        self.width,
-                        self.height
-                    )
-                )
-
-
-               
-                success, buffer = cv2.imencode(
-                    ".jpg",
-                    frame,
-                    [
-                        cv2.IMWRITE_JPEG_QUALITY,
-                        self.quality
-                    ]
-                )
-
-
-                if success:
-
-                    self.socket.emit(
-                        "screen_frame",
-                        {
-                            "agent_id": self.agent_id,
-                            "frame": buffer.tobytes()
-                        },
-                        namespace='/agent',
+                    frame = cv2.cvtColor(
+                        frame,
+                        cv2.COLOR_BGRA2BGR
                     )
 
+                    frame = cv2.resize(
+                        frame,
+                        (
+                            self.width,
+                            self.height
+                        )
+                    )
 
-               
-                elapsed = time.time() - start_time
+                    success, buffer = cv2.imencode(
+                        ".jpg",
+                        frame,
+                        [
+                            cv2.IMWRITE_JPEG_QUALITY,
+                            self.quality
+                        ]
+                    )
 
-                delay = max(
-                    0,
-                    (1 / self.fps) - elapsed
-                )
+                    if success:
+                        payload = base64.b64encode(buffer.tobytes()).decode('ascii')
+                        self.socket.emit(
+                            "screen_frame",
+                            {
+                                "agent_id": self.agent_id,
+                                "frame": payload
+                            },
+                            namespace='/agent',
+                        )
 
-                time.sleep(delay)
+                    elapsed = time.time() - start_time
+                    delay = max(
+                        0,
+                        (1 / self.fps) - elapsed
+                    )
+                    time.sleep(delay)
+        except Exception as error:
+            self.socket.emit(
+                'screen_error',
+                {'agent_id': self.agent_id, 'error': str(error)},
+                namespace='/agent',
+            )
+            self.streaming = False

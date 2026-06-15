@@ -1,5 +1,11 @@
+import shlex
+import subprocess
+
 from flask_socketio import emit
 from backend.extensions import socketio
+from backend.services.logger import get_logger
+
+logger = get_logger(__name__)
 
 def register_sockets():
     from backend.sockets import agent_socket
@@ -11,8 +17,7 @@ def register_socket_events(socketio):
 
     @socketio.on('connect')
     def connect():
-
-        print("Client Connected")
+        logger.info("Client connected")
 
         emit(
             'message',
@@ -22,9 +27,15 @@ def register_socket_events(socketio):
     def handle_terminal_command(data):
 
         command = data.get('command')
-        import subprocess
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        try:
+            args = shlex.split(command or '')
+            if not args:
+                raise ValueError('Command is required')
+            result = subprocess.run(args, shell=False, capture_output=True, text=True, timeout=30, check=False)
+            output, error = result.stdout, result.stderr
+        except Exception as exc:
+            output, error = '', str(exc)
         emit(
             'terminal_output',
-            {'output': result.stdout, 'error': result.stderr}
+            {'output': output, 'error': error}
         )
