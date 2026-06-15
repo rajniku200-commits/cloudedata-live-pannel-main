@@ -1,1 +1,1 @@
-"""Backend package for the CloudeData Live Panel Flask app."""
+"""Backend package for the LR Remote Access Flask app."""

@@ -49,8 +49,9 @@ def admin_start_agent_stream(data):
         emit('stream_control_result', _permission_error('Admin'))
         return
 
+    settings = stream_manager.configure_stream(agent_id, data.get('settings') or {})
     stream_manager.start_stream(agent_id, started_by=current_user.id)
-    ok = _emit_agent_command(agent_id, 'start_stream', {'agent_id': agent_id})
+    ok = _emit_agent_command(agent_id, 'start_stream', {'agent_id': agent_id, 'settings': settings})
     emit('stream_control_result', {
         'success': ok,
         'action': 'start',

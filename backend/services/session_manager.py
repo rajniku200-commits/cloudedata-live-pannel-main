@@ -18,12 +18,14 @@ class SessionManager:
         guac_token=None,
         guac_connection_id=None,
         connection_type='rdp',
+        published_app_id=None,
         ip_address=None,
         user_agent=None,
     ):
         session = RdpSession(
             user_id=user_id,
             server_id=server_id,
+            published_app_id=published_app_id,
             guac_token=guac_token,
             guac_connection_id=guac_connection_id,
             connection_type=connection_type,

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "cloudata-live-panel-api",
-    "description": "Postman collection generated from the cloudedata-live-pannel-main Flask routes.",
+    "description": "Postman collection generated from the LR Remote Access Flask routes.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [

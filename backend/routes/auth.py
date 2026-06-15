@@ -5,6 +5,8 @@ from functools import wraps
 
 from backend.models.user import User
 from backend.extensions import db
+from backend.models.activity_log import ActivityLog
+from backend.services.two_factor import verify_totp
 
 auth = Blueprint('auth', __name__)
 
@@ -60,7 +62,15 @@ def login():
 
     user = User.find_by_username(username)
     if user and check_password_hash(user.password, password):
+        if user.two_factor_enabled:
+            token = data.get('token') or data.get('two_factor_code')
+            if not token:
+                return jsonify({'message': 'Two-factor code required', 'requires_2fa': True}), 401
+            if not verify_totp(user.two_factor_secret, token):
+                ActivityLog.log(user.id, 'login_2fa_failed', 'auth', ip_address=request.remote_addr)
+                return jsonify({'message': 'Invalid two-factor code', 'requires_2fa': True}), 401
         login_user(user)
+        ActivityLog.log(user.id, 'login_success', 'auth', ip_address=request.remote_addr)
         return jsonify({'message': 'Login successful', 'redirect': url_for('portal.portal_home'), 'user': user.to_dict()}), 200
 
     return jsonify({'message': 'Invalid credentials'}), 401
@@ -85,6 +95,28 @@ def me():
 @admin_required
 def users():
     return jsonify({'users': [user.to_dict() for user in User.query.order_by(User.id.asc()).all()]}), 200
+
+
+@auth.route('/users', methods=['POST'])
+@admin_required
+def create_user():
+    data = _get_request_data()
+    username = (data.get('username') or '').strip()
+    password = (data.get('password') or '').strip()
+    role = data.get('role') or 'User'
+
+    if not username or not password:
+        return jsonify({'message': 'Username and password are required'}), 400
+    if User.find_by_username(username):
+        return jsonify({'message': 'Username already exists'}), 409
+
+    try:
+        role = User.normalize_role(role)
+    except ValueError as error:
+        return jsonify({'message': str(error)}), 400
+
+    user = User(username=username, password=generate_password_hash(password), role=role).save()
+    return jsonify({'message': 'User created successfully', 'user': user.to_dict()}), 201
 
 
 @auth.route('/users/<int:user_id>/role', methods=['PATCH', 'POST'])

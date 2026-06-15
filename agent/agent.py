@@ -44,7 +44,7 @@ def disconnect():
 def start_stream(data):
     data = data or {}
     if data.get('agent_id') in (None, agent_id):
-        screen_stream.start()
+        screen_stream.start(data.get('settings') or {})
 
 
 @sio.on('stop_stream', namespace=NAMESPACE)

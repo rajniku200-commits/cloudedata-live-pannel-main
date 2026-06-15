@@ -1,7 +1,7 @@
 import paramiko
 def connect_ssh(host, port, username, password):
     try:
-        # Strip whitespace from inputs
+  
         host = str(host).strip() if host else ""
         username = str(username).strip() if username else ""
         

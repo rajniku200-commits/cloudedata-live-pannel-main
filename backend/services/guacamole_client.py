@@ -90,6 +90,7 @@ class GuacamoleClient:
         domain: str = "",
         security: str = "any",
         ignore_cert: bool = True,
+        app: dict | None = None,
     ) -> dict:
         """
         Create a new RDP connection in Guacamole.
@@ -99,21 +100,34 @@ class GuacamoleClient:
         if not token:
             return {"success": False, "error": "Could not authenticate to Guacamole"}
 
+        parameters = {
+            "hostname":          host,
+            "port":              str(port),
+            "username":          rdp_username,
+            "password":          rdp_password,
+            "domain":            domain,
+            "security":          security,
+            "ignore-cert":       "true" if ignore_cert else "false",
+            "enable-drive":      "false",
+            "create-drive-path": "false",
+        }
+
+        if app:
+            launch_mode = app.get("launch_mode") or "remote_app"
+            if launch_mode == "remote_app" and app.get("remote_app_program"):
+                parameters["remote-app"] = app["remote_app_program"]
+                if app.get("working_directory"):
+                    parameters["remote-app-dir"] = app["working_directory"]
+                if app.get("arguments"):
+                    parameters["remote-app-args"] = app["arguments"]
+            elif launch_mode == "initial_program" and app.get("initial_program"):
+                parameters["initial-program"] = app["initial_program"]
+
         payload = {
             "name":           name,
             "protocol":       "rdp",
             "parentIdentifier": "ROOT",
-            "parameters": {
-                "hostname":         host,
-                "port":             str(port),
-                "username":         rdp_username,
-                "password":         rdp_password,
-                "domain":           domain,
-                "security":         security,
-                "ignore-cert":      "true" if ignore_cert else "false",
-                "enable-drive":     "false",
-                "create-drive-path": "false",
-            },
+            "parameters": parameters,
             "attributes": {
                 "max-connections":          "10",
                 "max-connections-per-user": "1",

@@ -26,10 +26,15 @@ class ScreenAgent:
         self.height = 720
 
 
-    def start(self):
+    def start(self, settings=None):
       
         if self.streaming:
             return
+        settings = settings or {}
+        self.fps = max(1, min(30, int(settings.get('fps', self.fps))))
+        self.quality = max(25, min(90, int(settings.get('quality', self.quality))))
+        self.width = max(320, min(1920, int(settings.get('width', self.width))))
+        self.height = max(240, min(1080, int(settings.get('height', self.height))))
 
         self.streaming = True
 

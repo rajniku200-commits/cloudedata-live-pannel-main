@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CloudeData — Dashboard</title>
+  <title>LR Remote Access - Admin</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#101218;--panel:#181c26;--panel2:#202636;--line:#30384d;--text:#eef2f7;--muted:#9aa6b8;--blue:#2563eb;--green:#16a34a;--amber:#d97706;--red:#dc2626}
@@ -11,17 +11,22 @@
     header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--panel)}
     .brand{display:flex;align-items:center;gap:12px;font-weight:900}.mark{width:36px;height:36px;display:grid;place-items:center;border-radius:8px;background:#fff;color:#111827}
     nav{display:flex;gap:10px;align-items:center}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:8px;padding:9px 12px;text-decoration:none;font-size:14px;cursor:pointer}
-    main{padding:28px;max-width:1280px;margin:0 auto}.title{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:22px}.title h1{font-size:28px}.title p{color:var(--muted);margin-top:6px}
-    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px}.label{color:var(--muted);font-size:12px;text-transform:uppercase;font-weight:800}.value{font-size:30px;font-weight:900;margin-top:8px}.green{color:#86efac}.blue{color:#93c5fd}.amber{color:#fcd34d}.red{color:#fca5a5}
-    .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.section h2{font-size:18px;margin-bottom:12px}.table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}.table th{color:var(--muted);background:#141824;text-transform:uppercase;font-size:12px}.badge{display:inline-flex;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800}.online,.active{background:rgba(22,163,74,.15);color:#86efac}.offline,.closed{background:rgba(154,166,184,.15);color:#cbd5e1}.error{background:rgba(220,38,38,.15);color:#fca5a5}.empty{padding:34px;text-align:center;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px}
-    @media(max-width:920px){.grid,.layout{grid-template-columns:1fr}.title{align-items:start;flex-direction:column}header{padding:0 16px}main{padding:18px}}
+    .btn.primary{background:var(--blue);border-color:var(--blue)}.btn.green{background:var(--green);border-color:var(--green)}.btn:disabled{opacity:.55;cursor:wait}
+    main{padding:28px;max-width:1380px;margin:0 auto}.title{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:22px}.title h1{font-size:28px}.title p{color:var(--muted);margin-top:6px}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px}.label{color:var(--muted);font-size:12px;text-transform:uppercase;font-weight:800}.value{font-size:30px;font-weight:900;margin-top:8px}.greenText{color:#86efac}.blueText{color:#93c5fd}.amberText{color:#fcd34d}.redText{color:#fca5a5}
+    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:800}.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+    .section{display:none}.section.active{display:block}.layout{display:grid;grid-template-columns:400px 1fr;gap:18px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px}.panel h2{font-size:18px;margin-bottom:12px}.hint{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:16px}
+    .field{margin-bottom:13px}label{display:block;color:#cbd5e1;font-size:12px;font-weight:800;margin-bottom:7px}input,select,textarea{width:100%;border:1px solid var(--line);background:#111827;color:var(--text);border-radius:8px;padding:10px 12px;font-size:14px;outline:none}textarea{min-height:72px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.message{min-height:22px;color:var(--muted);font-size:13px;margin-top:12px}.message.error{color:#fca5a5}.message.success{color:#86efac}
+    .table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}.table th{color:var(--muted);background:#141824;text-transform:uppercase;font-size:12px}.badge{display:inline-flex;border-radius:999px;padding:3px 9px;font-size:12px;font-weight:800}.online,.active,.open{background:rgba(22,163,74,.15);color:#86efac}.offline,.closed{background:rgba(154,166,184,.15);color:#cbd5e1}.error,.critical{background:rgba(220,38,38,.15);color:#fca5a5}.normal{background:rgba(37,99,235,.15);color:#93c5fd}.empty{padding:34px;text-align:center;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px}.mini{color:var(--muted);font-size:12px;margin-top:3px}.stack{display:grid;gap:14px}.wide{grid-column:1/-1}.code{white-space:pre-wrap;font-family:Consolas,monospace;font-size:12px;background:#0b1020;border:1px solid var(--line);border-radius:8px;padding:12px;max-height:260px;overflow:auto}
+    @media(max-width:960px){.grid,.layout{grid-template-columns:1fr}.title{align-items:start;flex-direction:column}header{padding:0 16px}main{padding:18px}.row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <header>
-    <div class="brand"><span class="mark">CD</span><span>Admin Dashboard</span></div>
+    <div class="brand"><span class="mark">LR</span><span>LR Remote Access Admin</span></div>
     <nav>
-      <a class="btn" href="/portal/">Portal</a>
+      <a class="btn" href="/portal/">User Portal</a>
       <a class="btn" href="/logout">Logout</a>
     </nav>
   </header>
@@ -29,103 +34,506 @@
   <main>
     <div class="title">
       <div>
-        <h1>Live overview</h1>
-        <p>Signed in as {{ user.username }}. Backend data below is loaded from Flask APIs.</p>
+        <h1>Admin control panel</h1>
+        <p>Create users, register Windows VPS servers, publish Tally or folders, and assign them to users.</p>
       </div>
       <button class="btn" onclick="refresh()">Refresh</button>
     </div>
 
     <section class="grid">
-      <div class="card"><div class="label">Total sessions</div><div class="value blue" id="total">{{ stats.total }}</div></div>
-      <div class="card"><div class="label">Active sessions</div><div class="value green" id="active">{{ stats.active }}</div></div>
-      <div class="card"><div class="label">Closed sessions</div><div class="value amber" id="closed">{{ stats.closed }}</div></div>
-      <div class="card"><div class="label">Errors</div><div class="value red" id="errors">{{ stats.errors }}</div></div>
+      <div class="card"><div class="label">Users</div><div class="value blueText" id="countUsers">0</div></div>
+      <div class="card"><div class="label">Servers</div><div class="value greenText" id="countServers">0</div></div>
+      <div class="card"><div class="label">Published items</div><div class="value amberText" id="countApps">0</div></div>
+      <div class="card"><div class="label">Active sessions</div><div class="value redText" id="countActive">0</div></div>
     </section>
 
-    <div class="layout">
-      <section class="section">
-        <h2>Servers</h2>
-        <div id="servers"></div>
-      </section>
-      <section class="section">
-        <h2>Connected agents</h2>
-        <div id="agents"></div>
-      </section>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('users', this)">Users</button>
+      <button class="tab" onclick="showTab('servers', this)">Windows VPS</button>
+      <button class="tab" onclick="showTab('apps', this)">Apps & Folders</button>
+      <button class="tab" onclick="showTab('assign', this)">Assignments</button>
+      <button class="tab" onclick="showTab('sessions', this)">Sessions</button>
+      <button class="tab" onclick="showTab('agents', this)">Agents</button>
+      <button class="tab" onclick="showTab('monitoring', this)">Monitoring</button>
+      <button class="tab" onclick="showTab('transfers', this)">Files</button>
+      <button class="tab" onclick="showTab('tickets', this)">Tickets</button>
+      <button class="tab" onclick="showTab('security', this)">Security</button>
+      <button class="tab" onclick="showTab('audit', this)">Audit</button>
     </div>
 
-    <section class="section" style="margin-top:22px">
-      <h2>Recent sessions</h2>
-      <div id="sessions"></div>
+    <section class="section active" id="tab-users">
+      <div class="layout">
+        <form class="panel" id="userForm">
+          <h2>Create user</h2>
+          <p class="hint">This creates the login ID and password the client will use on the URL or desktop launcher.</p>
+          <div class="field"><label>Username</label><input name="username" required></div>
+          <div class="field"><label>Password</label><input name="password" type="password" required></div>
+          <div class="field"><label>Role</label><select name="role"><option>User</option><option>Manager</option><option>Admin</option></select></div>
+          <button class="btn green" type="submit">Create User</button>
+          <div class="message" id="userMsg"></div>
+        </form>
+        <div id="usersTable"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-servers">
+      <div class="layout">
+        <form class="panel" id="serverForm">
+          <h2>Add Windows VPS</h2>
+          <p class="hint">Add the VPS where Tally or other applications are installed. Use the Windows RDP port, normally 3389.</p>
+          <div class="field"><label>Display name</label><input name="name" placeholder="Tally VPS" required></div>
+          <div class="field"><label>Host / IP</label><input name="host" placeholder="203.0.113.10" required></div>
+          <div class="row">
+            <div class="field"><label>RDP username</label><input name="username" required></div>
+            <div class="field"><label>RDP port</label><input name="port" type="number" value="3389" required></div>
+          </div>
+          <div class="field"><label>RDP password</label><input name="password" type="password" required></div>
+          <button class="btn green" type="submit">Add VPS</button>
+          <div class="message" id="serverMsg"></div>
+        </form>
+        <div id="serversTable"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-apps">
+      <div class="layout">
+        <form class="panel" id="appForm">
+          <h2>Publish app or folder</h2>
+          <p class="hint">For Tally RemoteApp use a program alias like <b>||Tally</b>. For a folder use Explorer with the folder path as an argument.</p>
+          <div class="field"><label>Name shown to user</label><input name="name" placeholder="Tally" required></div>
+          <div class="field"><label>Windows VPS</label><select name="server_id" id="appServerSelect" required></select></div>
+          <div class="field"><label>Type</label><select name="item_type" id="itemType"><option value="remote_app">Remote app</option><option value="folder">Folder</option><option value="desktop">Full desktop fallback</option></select></div>
+          <div class="field"><label>RemoteApp program / folder path</label><input name="target" placeholder="||Tally or C:\\TallyData" required></div>
+          <div class="field"><label>Working directory</label><input name="working_directory" placeholder="Optional"></div>
+          <div class="field"><label>Extra arguments</label><input name="arguments" placeholder="Optional"></div>
+          <div class="field"><label>Description</label><textarea name="description" placeholder="Optional note for admin"></textarea></div>
+          <button class="btn green" type="submit">Publish</button>
+          <div class="message" id="appMsg"></div>
+        </form>
+        <div id="appsTable"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-assign">
+      <div class="layout">
+        <form class="panel" id="assignForm">
+          <h2>Assign to user</h2>
+          <p class="hint">After assignment, the item appears as an icon in that user's floating launcher after login.</p>
+          <div class="field"><label>User</label><select name="user_id" id="assignUserSelect" required></select></div>
+          <div class="field"><label>App or folder</label><select name="app_id" id="assignAppSelect" required></select></div>
+          <button class="btn green" type="submit">Assign</button>
+          <div class="message" id="assignMsg"></div>
+        </form>
+        <div id="assignmentsTable"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-sessions">
+      <div id="sessionsTable"></div>
+    </section>
+
+    <section class="section" id="tab-agents">
+      <div class="layout">
+        <div class="panel">
+          <h2>Agent auto-installation</h2>
+          <p class="hint">Generate a Linux installer for a machine that should appear as a controllable agent.</p>
+          <button class="btn green" onclick="loadInstaller()">Generate Installer</button>
+          <div class="message" id="agentMsg"></div>
+          <pre class="code" id="installScript"></pre>
+        </div>
+        <div id="agentsTable"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-monitoring">
+      <div class="stack">
+        <div id="healthCards" class="grid"></div>
+        <div id="dockerTable"></div>
+        <div id="kubeTable"></div>
+        <form class="panel" id="alertForm">
+          <h2>Alerting</h2>
+          <div class="row">
+            <div class="field"><label>Subject</label><input name="subject" value="LR Remote Access test alert"></div>
+            <div class="field"><label>Severity</label><select name="severity"><option>info</option><option>normal</option><option>critical</option></select></div>
+          </div>
+          <div class="field"><label>Message</label><textarea name="message">Alerting is configured.</textarea></div>
+          <button class="btn green" type="submit">Send Test Alert</button>
+          <div class="message" id="alertMsg"></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="section" id="tab-transfers">
+      <div class="layout">
+        <form class="panel" id="transferForm">
+          <h2>File transfer</h2>
+          <div class="field"><label>Upload file</label><input name="file" type="file" required></div>
+          <button class="btn green" type="submit">Upload</button>
+          <div class="message" id="transferMsg"></div>
+        </form>
+        <div id="transfersTable"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-tickets">
+      <div class="layout">
+        <form class="panel" id="ticketForm">
+          <h2>Create ticket</h2>
+          <div class="field"><label>Title</label><input name="title" required></div>
+          <div class="field"><label>Priority</label><select name="priority"><option>normal</option><option>critical</option><option>low</option></select></div>
+          <div class="field"><label>Description</label><textarea name="description"></textarea></div>
+          <button class="btn green" type="submit">Create Ticket</button>
+          <div class="message" id="ticketMsg"></div>
+        </form>
+        <div id="ticketsTable"></div>
+      </div>
+    </section>
+
+    <section class="section" id="tab-security">
+      <div class="layout">
+        <form class="panel" id="twoFactorForm">
+          <h2>Two-factor authentication</h2>
+          <p class="hint">Use an authenticator app with the generated secret, then enter the current 6-digit code.</p>
+          <button class="btn" type="button" onclick="setup2fa()">Generate Secret</button>
+          <pre class="code" id="twoFactorSecret"></pre>
+          <div class="field"><label>Authenticator code</label><input name="token" inputmode="numeric"></div>
+          <button class="btn green" type="submit">Enable 2FA</button>
+          <button class="btn" type="button" onclick="disable2fa()">Disable 2FA</button>
+          <div class="message" id="twoFactorMsg"></div>
+        </form>
+        <form class="panel" id="clipboardForm">
+          <h2>Clipboard sync</h2>
+          <div class="field"><label>Clipboard text</label><textarea name="content" required></textarea></div>
+          <button class="btn green" type="submit">Save Clipboard</button>
+          <div class="message" id="clipboardMsg"></div>
+          <div id="clipboardTable"></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="section" id="tab-audit">
+      <div id="auditTable"></div>
     </section>
   </main>
 
   <script>
     const initialServers = {{ servers | tojson }};
+    let users = [];
+    let servers = [...initialServers];
+    let apps = [];
+    let sessions = [];
 
-    document.addEventListener('DOMContentLoaded', refresh);
+    document.addEventListener('DOMContentLoaded', () => {
+      bindForms();
+      refresh();
+    });
+
+    function bindForms() {
+      document.getElementById('userForm').addEventListener('submit', submitUser);
+      document.getElementById('serverForm').addEventListener('submit', submitServer);
+      document.getElementById('appForm').addEventListener('submit', submitApp);
+      document.getElementById('assignForm').addEventListener('submit', submitAssign);
+      document.getElementById('ticketForm').addEventListener('submit', submitTicket);
+      document.getElementById('transferForm').addEventListener('submit', submitTransfer);
+      document.getElementById('twoFactorForm').addEventListener('submit', enable2fa);
+      document.getElementById('clipboardForm').addEventListener('submit', submitClipboard);
+      document.getElementById('alertForm').addEventListener('submit', submitAlert);
+    }
+
+    function showTab(name, button) {
+      document.querySelectorAll('.section').forEach(item => item.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+    }
 
     async function refresh() {
-      renderServers(initialServers);
-      await Promise.all([loadStats(), loadAgents(), loadSessions()]);
+      await Promise.all([loadUsers(), loadServers(), loadApps(), loadStats(), loadSessions(), loadAgents(), loadMonitoring(), loadTransfers(), loadTickets(), loadClipboard(), loadAudit()]);
+      renderAll();
+    }
+
+    async function loadUsers() {
+      const response = await fetch('/users');
+      const data = await response.json();
+      users = data.users || [];
+    }
+
+    async function loadServers() {
+      const response = await fetch('/portal/api/servers');
+      const data = await response.json();
+      servers = data.servers || [];
+    }
+
+    async function loadApps() {
+      const response = await fetch('/api/apps');
+      const data = await response.json();
+      apps = data.apps || [];
     }
 
     async function loadStats() {
       const response = await fetch('/api/sessions/stats');
       const data = await response.json();
-      if (!data.success) return;
-      ['total','active','closed','errors'].forEach(key => document.getElementById(key).textContent = data[key] ?? 0);
-    }
-
-    async function loadAgents() {
-      try {
-        const response = await fetch('/agents');
-        renderAgents(await response.json());
-      } catch (error) {
-        document.getElementById('agents').innerHTML = '<div class="empty">Unable to load agents.</div>';
-      }
+      document.getElementById('countActive').textContent = data.active || 0;
     }
 
     async function loadSessions() {
+      const response = await fetch('/api/sessions/?status=all');
+      const data = await response.json();
+      sessions = data.sessions || [];
+    }
+
+    let agents = [], monitoring = {}, transfers = [], tickets = [], clipboardItems = [], auditLogs = [];
+    async function loadAgents(){ agents = await fetchJson('/agents', []); }
+    async function loadMonitoring(){ monitoring = await fetchJson('/api/monitoring', {}); }
+    async function loadTransfers(){ transfers = (await fetchJson('/api/transfers', {})).files || []; }
+    async function loadTickets(){ tickets = (await fetchJson('/api/tickets?status=all', {})).tickets || []; }
+    async function loadClipboard(){ clipboardItems = (await fetchJson('/api/clipboard', {})).items || []; }
+    async function loadAudit(){ auditLogs = await fetchJson('/logs', []); }
+
+    function renderAll() {
+      document.getElementById('countUsers').textContent = users.length;
+      document.getElementById('countServers').textContent = servers.length;
+      document.getElementById('countApps').textContent = apps.length;
+      renderUsers();
+      renderServers();
+      renderApps();
+      renderAssignments();
+      renderSessions();
+      renderAgents();
+      renderMonitoring();
+      renderTransfers();
+      renderTickets();
+      renderClipboard();
+      renderAudit();
+      fillSelects();
+    }
+
+    function fillSelects() {
+      fillSelect('appServerSelect', servers, item => item.id, item => `${item.name} (${item.ip_address})`);
+      fillSelect('assignUserSelect', users, item => item.id, item => `${item.username} (${item.role})`);
+      fillSelect('assignAppSelect', apps, item => item.id, item => item.name);
+    }
+
+    function fillSelect(id, items, valueFn, textFn) {
+      const select = document.getElementById(id);
+      select.innerHTML = items.length ? items.map(item => `<option value="${valueFn(item)}">${escapeHtml(textFn(item))}</option>`).join('') : '<option value="">No records available</option>';
+    }
+
+    function renderUsers() {
+      const host = document.getElementById('usersTable');
+      if (!users.length) return host.innerHTML = '<div class="empty">No users yet.</div>';
+      host.innerHTML = table(['ID','Username','Role'], users.map(user => [
+        `#${user.id}`,
+        escapeHtml(user.username),
+        `<span class="badge active">${escapeHtml(user.role)}</span>`
+      ]));
+    }
+
+    function renderServers() {
+      const host = document.getElementById('serversTable');
+      if (!servers.length) return host.innerHTML = '<div class="empty">No Windows VPS records yet.</div>';
+      host.innerHTML = table(['Name','Host','Port','Status'], servers.map(server => [
+        escapeHtml(server.name),
+        escapeHtml(server.ip_address || ''),
+        server.rdp_port || 3389,
+        `<span class="badge ${server.is_active ? 'online':'offline'}">${server.is_active ? 'Online':'Offline'}</span>`
+      ]));
+    }
+
+    function renderApps() {
+      const host = document.getElementById('appsTable');
+      if (!apps.length) return host.innerHTML = '<div class="empty">No apps or folders published yet.</div>';
+      host.innerHTML = table(['Name','Server','Mode','Target','Assigned'], apps.map(app => [
+        `<b>${escapeHtml(app.name)}</b><div class="mini">${escapeHtml(app.description || '')}</div>`,
+        escapeHtml((app.server && app.server.name) || `#${app.server_id}`),
+        escapeHtml(app.launch_mode),
+        escapeHtml(app.remote_app_program || app.initial_program || 'Desktop'),
+        (app.assigned_user_ids || []).length
+      ]));
+    }
+
+    function renderAssignments() {
+      const host = document.getElementById('assignmentsTable');
+      const rows = [];
+      apps.forEach(app => {
+        (app.assigned_user_ids || []).forEach(userId => {
+          const user = users.find(item => item.id === userId);
+          rows.push([
+            escapeHtml(user ? user.username : `User #${userId}`),
+            escapeHtml(app.name),
+            `<button class="btn" onclick="unassign(${app.id}, ${userId})">Remove</button>`
+          ]);
+        });
+      });
+      host.innerHTML = rows.length ? table(['User','Assigned item','Action'], rows) : '<div class="empty">No assignments yet.</div>';
+    }
+
+    function renderSessions() {
+      const host = document.getElementById('sessionsTable');
+      if (!sessions.length) return host.innerHTML = '<div class="empty">No sessions recorded yet.</div>';
+      host.innerHTML = table(['ID','User','Server','Item','Type','Status','Started'], sessions.slice(0, 80).map(session => [
+        `#${session.id}`,
+        session.user_id,
+        session.server_id,
+        escapeHtml(session.published_app_name || '-'),
+        escapeHtml(session.connection_type || 'rdp'),
+        `<span class="badge ${session.status}">${escapeHtml(session.status)}</span>`,
+        formatDate(session.started_at)
+      ]));
+    }
+
+    function renderAgents() {
+      const host = document.getElementById('agentsTable');
+      if (!agents.length) return host.innerHTML = '<div class="empty">No agents online yet.</div>';
+      host.innerHTML = table(['Agent','Host','User','Status','Recording'], agents.map(agent => [
+        escapeHtml(agent.agent_id),
+        `<b>${escapeHtml(agent.hostname || '')}</b><div class="mini">${escapeHtml(agent.ip_address || '')}</div>`,
+        escapeHtml(agent.username || ''),
+        `<span class="badge ${agent.status === 'online' ? 'online':'offline'}">${escapeHtml(agent.status)}</span>`,
+        `<button class="btn" onclick="startRecording('${escapeAttr(agent.agent_id)}')">Start</button> <button class="btn" onclick="stopRecording('${escapeAttr(agent.agent_id)}')">Stop</button>`
+      ]));
+    }
+
+    function renderMonitoring() {
+      const health = monitoring.health || {};
+      document.getElementById('healthCards').innerHTML = ['cpu_percent','memory_percent','disk_percent'].map(key => `<div class="card"><div class="label">${escapeHtml(key.replace('_',' '))}</div><div class="value">${health[key] ?? '-' }%</div></div>`).join('');
+      const docker = (monitoring.docker && monitoring.docker.containers) || [];
+      document.getElementById('dockerTable').innerHTML = docker.length ? table(['Docker container','Image','Status'], docker.map(item => [escapeHtml(item.name), escapeHtml(item.image), escapeHtml(item.status)])) : '<div class="empty">Docker monitoring unavailable or no containers.</div>';
+      const pods = (monitoring.kubernetes && monitoring.kubernetes.pods) || [];
+      document.getElementById('kubeTable').innerHTML = pods.length ? table(['Namespace','Pod','Ready','Status','Node'], pods.map(item => [escapeHtml(item.namespace), escapeHtml(item.name), escapeHtml(item.ready), escapeHtml(item.status), escapeHtml(item.node)])) : '<div class="empty">Kubernetes monitoring unavailable or no pods.</div>';
+    }
+
+    function renderTransfers() {
+      const host = document.getElementById('transfersTable');
+      host.innerHTML = transfers.length ? table(['File','Size','Download'], transfers.map(file => [escapeHtml(file.name), `${Math.ceil(file.size / 1024)} KB`, `<a class="btn" href="${escapeAttr(file.url)}">Download</a>`])) : '<div class="empty">No transferred files yet.</div>';
+    }
+
+    function renderTickets() {
+      const host = document.getElementById('ticketsTable');
+      host.innerHTML = tickets.length ? table(['ID','Title','Priority','Status','Action'], tickets.map(ticket => [`#${ticket.id}`, escapeHtml(ticket.title), `<span class="badge ${escapeAttr(ticket.priority)}">${escapeHtml(ticket.priority)}</span>`, `<span class="badge ${escapeAttr(ticket.status)}">${escapeHtml(ticket.status)}</span>`, `<button class="btn" onclick="closeTicket(${ticket.id})">Close</button>`])) : '<div class="empty">No tickets yet.</div>';
+    }
+
+    function renderClipboard() {
+      const host = document.getElementById('clipboardTable');
+      host.innerHTML = clipboardItems.length ? table(['When','Direction','Content'], clipboardItems.slice(0, 5).map(item => [formatDate(item.created_at), escapeHtml(item.direction), escapeHtml(item.content).slice(0, 120)])) : '';
+    }
+
+    function renderAudit() {
+      const host = document.getElementById('auditTable');
+      host.innerHTML = auditLogs.length ? table(['Time','User','Action','Category'], auditLogs.map(log => [formatDate(log.timestamp || log.time), log.user_id || '-', escapeHtml(log.action), escapeHtml(log.category || '')])) : '<div class="empty">No audit log entries yet.</div>';
+    }
+
+    async function submitUser(event) {
+      event.preventDefault();
+      const payload = formPayload(event.target);
+      await postJson('/users', payload, 'userMsg', event.target);
+    }
+
+    async function submitServer(event) {
+      event.preventDefault();
+      const payload = formPayload(event.target);
+      await postJson('/add-server', payload, 'serverMsg', event.target);
+    }
+
+    async function submitApp(event) {
+      event.preventDefault();
+      const form = event.target;
+      const data = formPayload(form);
+      const itemType = data.item_type;
+      const payload = {
+        server_id: data.server_id,
+        name: data.name,
+        icon: itemType === 'folder' ? 'folder' : data.name,
+        description: data.description,
+        working_directory: data.working_directory,
+        arguments: data.arguments,
+        launch_mode: itemType === 'desktop' ? 'desktop' : itemType === 'folder' ? 'initial_program' : 'remote_app'
+      };
+      if (itemType === 'folder') {
+        payload.initial_program = 'explorer.exe';
+        payload.arguments = data.target;
+      } else if (itemType === 'remote_app') {
+        payload.remote_app_program = data.target;
+      }
+      await postJson('/api/apps', payload, 'appMsg', form);
+    }
+
+    async function submitAssign(event) {
+      event.preventDefault();
+      const data = formPayload(event.target);
+      await postJson(`/api/apps/${data.app_id}/assign`, {user_id: data.user_id}, 'assignMsg', event.target);
+    }
+
+    async function unassign(appId, userId) {
+      await fetch(`/api/apps/${appId}/assign/${userId}`, {method: 'DELETE'});
+      await refresh();
+    }
+
+    async function submitTicket(event) { event.preventDefault(); await postJson('/api/tickets', formPayload(event.target), 'ticketMsg', event.target); }
+    async function closeTicket(id) { await fetch(`/api/tickets/${id}`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:'closed'})}); await refresh(); }
+    async function submitClipboard(event) { event.preventDefault(); await postJson('/api/clipboard', formPayload(event.target), 'clipboardMsg', event.target); }
+    async function submitAlert(event) { event.preventDefault(); await postJson('/api/alerts/test', formPayload(event.target), 'alertMsg', event.target); }
+    async function submitTransfer(event) {
+      event.preventDefault();
+      const msg = document.getElementById('transferMsg');
+      msg.textContent = 'Uploading...';
+      const response = await fetch('/api/transfers', {method:'POST', body:new FormData(event.target)});
+      const data = await response.json();
+      msg.textContent = data.error || data.message || (response.ok ? 'Uploaded' : 'Upload failed');
+      msg.className = response.ok ? 'message success' : 'message error';
+      event.target.reset();
+      await refresh();
+    }
+    async function setup2fa() {
+      const data = await fetchJson('/api/2fa/setup', {}, {method:'POST'});
+      document.getElementById('twoFactorSecret').textContent = data.secret ? `Secret: ${data.secret}\n${data.provisioning_uri}` : (data.error || 'Unable to generate secret');
+    }
+    async function enable2fa(event) { event.preventDefault(); await postJson('/api/2fa/enable', formPayload(event.target), 'twoFactorMsg', event.target); }
+    async function disable2fa() { await postJson('/api/2fa/disable', {}, 'twoFactorMsg', document.getElementById('twoFactorForm')); }
+    async function loadInstaller() {
+      const data = await fetchJson('/api/agents/install-script', {});
+      document.getElementById('installScript').textContent = data.linux_script || data.error || 'Unable to generate installer';
+    }
+    async function startRecording(agentId) { await fetch(`/api/recordings/${encodeURIComponent(agentId)}/start`, {method:'POST'}); await refresh(); }
+    async function stopRecording(agentId) { await fetch(`/api/recordings/${encodeURIComponent(agentId)}/stop`, {method:'POST'}); await refresh(); }
+
+    async function fetchJson(url, fallback, options) {
       try {
-        const response = await fetch('/api/sessions/?status=all');
-        const data = await response.json();
-        renderSessions(data.sessions || []);
+        const response = await fetch(url, options || {});
+        if (!response.ok) return fallback;
+        return await response.json();
       } catch (error) {
-        document.getElementById('sessions').innerHTML = '<div class="empty">Unable to load sessions.</div>';
+        return fallback;
       }
     }
 
-    function renderServers(servers) {
-      const host = document.getElementById('servers');
-      if (!servers.length) {
-        host.innerHTML = '<div class="empty">No servers have been added yet.</div>';
+    async function postJson(url, payload, messageId, form) {
+      const msg = document.getElementById(messageId);
+      msg.textContent = 'Saving...';
+      msg.className = 'message';
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok || data.success === false) {
+        msg.textContent = data.error || data.message || 'Request failed';
+        msg.className = 'message error';
         return;
       }
-      host.innerHTML = `<table class="table"><thead><tr><th>Name</th><th>Host</th><th>Port</th><th>Status</th></tr></thead><tbody>${servers.map(server => `
-        <tr><td>${escapeHtml(server.name)}</td><td>${escapeHtml(server.ip_address || '')}</td><td>${server.rdp_port || 3389}</td><td><span class="badge ${server.is_active ? 'online':'offline'}">${server.is_active ? 'Online':'Offline'}</span></td></tr>
-      `).join('')}</tbody></table>`;
+      msg.textContent = data.message || 'Saved successfully';
+      msg.className = 'message success';
+      form.reset();
+      await refresh();
     }
 
-    function renderAgents(agents) {
-      const host = document.getElementById('agents');
-      if (!agents.length) {
-        host.innerHTML = '<div class="empty">No agents connected yet.</div>';
-        return;
-      }
-      host.innerHTML = `<table class="table"><thead><tr><th>Host</th><th>User</th><th>Status</th></tr></thead><tbody>${agents.map(agent => `
-        <tr><td>${escapeHtml(agent.hostname || agent.agent_id)}</td><td>${escapeHtml(agent.username || '')}</td><td><span class="badge ${agent.status === 'online' ? 'online':'offline'}">${escapeHtml(agent.status || 'offline')}</span></td></tr>
-      `).join('')}</tbody></table>`;
+    function formPayload(form) {
+      return Object.fromEntries(new FormData(form).entries());
     }
 
-    function renderSessions(sessions) {
-      const host = document.getElementById('sessions');
-      if (!sessions.length) {
-        host.innerHTML = '<div class="empty">No sessions recorded yet.</div>';
-        return;
-      }
-      host.innerHTML = `<table class="table"><thead><tr><th>ID</th><th>Server</th><th>User</th><th>Type</th><th>Status</th><th>Started</th></tr></thead><tbody>${sessions.slice(0, 50).map(session => `
-        <tr><td>#${session.id}</td><td>${session.server_id}</td><td>${session.user_id}</td><td>${escapeHtml(session.connection_type || 'rdp')}</td><td><span class="badge ${session.status}">${escapeHtml(session.status)}</span></td><td>${formatDate(session.started_at)}</td></tr>
-      `).join('')}</tbody></table>`;
+    function table(headers, rows) {
+      return `<table class="table"><thead><tr>${headers.map(item => `<th>${escapeHtml(item)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
     }
 
     function formatDate(value) {
@@ -134,6 +542,9 @@
 
     function escapeHtml(value) {
       return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+    }
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, '&#096;');
     }
   </script>
 </body>

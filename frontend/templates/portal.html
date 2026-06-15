@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CloudeData — User Portal</title>
+<title>LR Remote Access - User Portal</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   :root{
@@ -146,17 +146,32 @@
   .empty-state .icon{font-size:48px;margin-bottom:16px;opacity:.4}
   .empty-state p{font-size:14px}
 
-  /* ── Scrollbar ── */
+  /* -- Published app launcher -- */
+  .launcher-stage{min-height:360px;display:flex;align-items:center;justify-content:center;padding:48px 16px}
+  .floating-panel{width:min(720px,100%);background:rgba(30,34,53,.92);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);padding:22px}
+  .panel-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .panel-title{font-size:16px;font-weight:700}
+  .panel-subtitle{font-size:13px;color:var(--text3);margin-top:3px}
+  .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:14px}
+  .app-tile{height:124px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:all .2s}
+  .app-tile:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,99,255,.18)}
+  .app-icon{width:46px;height:46px;border-radius:8px;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.28);display:flex;align-items:center;justify-content:center;font-size:24px}
+  .app-name{font-size:13px;font-weight:700;text-align:center;line-height:1.25;max-width:100%;padding:0 6px;overflow-wrap:anywhere}
+
+ 
   ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
+
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-logo">🖥</div>
-  <div class="nav-item active" onclick="showSection('servers', this)">
-    <span class="nav-icon">⬡</span><span class="nav-label">My Servers</span>
+  <div class="nav-item active" onclick="showSection('apps', this)">
+    <span class="nav-icon">⬡</span><span class="nav-label">My Apps</span>
+  </div>
+  <div class="nav-item" onclick="showSection('servers', this)">
+    <span class="nav-icon">🖥</span><span class="nav-label">Servers</span>
   </div>
   <div class="nav-item" onclick="showSection('sessions', this)">
     <span class="nav-icon">⚡</span><span class="nav-label">My Sessions</span>
@@ -165,7 +180,7 @@
     <span class="nav-icon">📁</span><span class="nav-label">Files</span>
   </div>
   <div class="nav-bottom">
-    <div class="nav-item" onclick="window.location='/portal/dashboard'">
+    <div class="nav-item" onclick="window.location='/portal/dashboard'" {% if not user.is_admin %}style="display:none"{% endif %}>
       <span class="nav-icon">📊</span><span class="nav-label">Admin Dashboard</span>
     </div>
     <div class="nav-item" onclick="logout()">
@@ -180,7 +195,7 @@
   <div class="header">
     <div class="header-left">
       <h1>Welcome back, {{ user.username }} 👋</h1>
-      <p>Select a server to launch your remote desktop</p>
+      <p>Select an assigned application to start your remote session</p>
     </div>
     <div class="header-right">
       <div class="user-info">
@@ -219,8 +234,26 @@
     </div>
   </div>
 
+  <!-- Published apps section -->
+  <div id="section-apps">
+    <div class="launcher-stage">
+      <div class="floating-panel">
+        <div class="panel-top">
+          <div>
+            <div class="panel-title">My applications</div>
+            <div class="panel-subtitle">Launch Tally or any application assigned by your admin</div>
+          </div>
+          <button class="btn btn-secondary" onclick="loadApps()" style="padding:8px 16px">⟳ Refresh</button>
+        </div>
+        <div class="app-grid" id="appGrid">
+          <div class="empty-state"><div class="icon">⏳</div><p>Loading applications...</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Servers section -->
-  <div id="section-servers">
+  <div id="section-servers" style="display:none">
     <div class="section-header">
       <div>
         <div class="section-title">Available servers</div>
@@ -307,11 +340,13 @@
 <script>
   const INITIAL_SERVERS = {{ servers | tojson }};
   let serversState = [...INITIAL_SERVERS];
+  let appsState = [];
   let currentFilter = 'all';
   let selectedServer = null;
 
   /* ─── INIT ─── */
   document.addEventListener('DOMContentLoaded', () => {
+    loadApps();
     renderServers(serversState);
     loadStats();
     loadMySessions();
@@ -408,6 +443,68 @@
     renderServers(serversState);
   }
 
+  /* ─── PUBLISHED APPS ─── */
+  async function loadApps() {
+    const grid = document.getElementById('appGrid');
+    grid.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>Loading applications...</p></div>';
+    try {
+      const r = await fetch('/portal/api/apps');
+      const d = await r.json();
+      if (!d.success) throw new Error(d.error || 'Unable to load apps');
+      appsState = d.apps || [];
+      renderApps(appsState);
+    } catch(e) {
+      grid.innerHTML = '<div class="empty-state"><div class="icon">⚠</div><p>Unable to load applications.</p></div>';
+    }
+  }
+
+  function renderApps(apps) {
+    const grid = document.getElementById('appGrid');
+    if (!apps.length) {
+      grid.innerHTML = '<div class="empty-state"><div class="icon">⬡</div><p>No applications assigned yet.</p></div>';
+      return;
+    }
+    grid.innerHTML = apps.map(app => `
+      <button class="app-tile" onclick="launchApp(${app.id})" title="${escapeHtml(app.name)}">
+        <span class="app-icon">${iconForApp(app)}</span>
+        <span class="app-name">${escapeHtml(app.name)}</span>
+      </button>
+    `).join('');
+  }
+
+  function iconForApp(app) {
+    const name = `${app.icon || ''} ${app.name || ''}`.toLowerCase();
+    if (name.includes('tally')) return 'T';
+    if (name.includes('excel')) return 'X';
+    if (name.includes('word')) return 'W';
+    if (name.includes('browser')) return '🌐';
+    return '▣';
+  }
+
+  async function launchApp(appId) {
+    const app = appsState.find(item => item.id === appId);
+    if (!app) return;
+    toast(`Starting ${app.name}...`, 'info');
+    try {
+      const r = await fetch(`/portal/api/apps/${appId}/launch`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({})
+      });
+      const d = await r.json();
+      if (d.success) {
+        toast(`${app.name} is opening...`, 'success');
+        setTimeout(() => window.open(d.client_url, '_blank'), 300);
+        loadStats();
+        loadMySessions();
+      } else {
+        toast(d.error || 'Application launch failed', 'error');
+      }
+    } catch(e) {
+      toast('Network error while launching app', 'error');
+    }
+  }
+
   /* ─── MODAL ─── */
   function openLaunchModal(server) {
     if (!server.is_active) return;
@@ -458,7 +555,7 @@
     btn.innerHTML = '<span>🖥</span> Connect now';
   }
 
-  /* ─── MY SESSIONS ─── */
+
   async function loadMySessions() {
     try {
       const r = await fetch('/portal/api/my-sessions');
@@ -506,7 +603,7 @@
       </table>`;
   }
 
-  /* ─── HELPERS ─── */
+
   function timeAgo(iso) {
     if (!iso) return '—';
     const diff = Math.floor((Date.now() - new Date(iso)) / 1000);

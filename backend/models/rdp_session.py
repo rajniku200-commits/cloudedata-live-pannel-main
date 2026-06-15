@@ -8,6 +8,7 @@ class RdpSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     server_id = db.Column(db.Integer, db.ForeignKey('servers.id'), nullable=False)
+    published_app_id = db.Column(db.Integer, db.ForeignKey('published_apps.id'), nullable=True)
     guac_token = db.Column(db.String(512), nullable=True)
     guac_connection_id = db.Column(db.String(255), nullable=True)
     connection_type = db.Column(db.String(10), default='rdp')
@@ -20,6 +21,7 @@ class RdpSession(db.Model):
 
     user = db.relationship('User', backref=db.backref('rdp_sessions', lazy='dynamic'))
     server = db.relationship('Server', backref=db.backref('rdp_sessions', lazy='dynamic'))
+    published_app = db.relationship('PublishedApp', backref=db.backref('rdp_sessions', lazy='dynamic'))
 
     def save(self):
         db.session.add(self)
@@ -35,6 +37,8 @@ class RdpSession(db.Model):
             'id': self.id,
             'user_id': self.user_id,
             'server_id': self.server_id,
+            'published_app_id': self.published_app_id,
+            'published_app_name': self.published_app.name if self.published_app else None,
             'guac_token': self.guac_token,
             'guac_connection_id': self.guac_connection_id,
             'connection_type': self.connection_type,

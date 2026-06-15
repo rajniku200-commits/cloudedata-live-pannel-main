@@ -10,6 +10,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(128), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='User')
+    two_factor_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    two_factor_secret = db.Column(db.String(64), nullable=True)
 
     @classmethod
     def normalize_role(cls, role):
@@ -43,6 +45,7 @@ class User(UserMixin, db.Model):
             'id': self.id,
             'username': self.username,
             'role': self.role,
+            'two_factor_enabled': bool(self.two_factor_enabled),
         }
 
     @classmethod

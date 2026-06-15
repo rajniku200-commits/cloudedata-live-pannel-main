@@ -9,6 +9,8 @@ from backend.models.session import Session
 from backend.models.rdp_session import RdpSession
 from backend.models.activity_log import ActivityLog
 from backend.models.agent import Agent
+from backend.models.published_app import ApplicationAssignment, PublishedApp
+from backend.models.ticket import ClipboardItem, Ticket
 
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -44,9 +46,20 @@ with app.app_context():
         if 'role' not in user_columns:
             db.session.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'User'"))
             db.session.commit()
+        if 'two_factor_enabled' not in user_columns:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN two_factor_enabled BOOLEAN NOT NULL DEFAULT 0"))
+            db.session.commit()
+        if 'two_factor_secret' not in user_columns:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN two_factor_secret VARCHAR(64)"))
+            db.session.commit()
         if User.query.count() and not User.query.filter_by(role='Admin').first():
             first_user = User.query.order_by(User.id.asc()).first()
             first_user.role = 'Admin'
+            db.session.commit()
+    if 'rdp_sessions' in inspector.get_table_names():
+        session_columns = {column['name'] for column in inspector.get_columns('rdp_sessions')}
+        if 'published_app_id' not in session_columns:
+            db.session.execute(text("ALTER TABLE rdp_sessions ADD COLUMN published_app_id INTEGER"))
             db.session.commit()
 
 import backend.sockets.socket_handler
@@ -61,6 +74,8 @@ from backend.routes.services_manager import services
 from backend.routes.logs import logs
 from backend.routes.portal import portal_bp
 from backend.routes.sessions import sessions_bp
+from backend.routes.apps import apps_bp
+from backend.routes.admin_features import admin_features
 from backend.routes.rdp import init_rdp_namespace
 from backend.sockets.socket_handler import register_sockets
 from backend.routes.agent import agent_bp
@@ -79,7 +94,9 @@ app.register_blueprint(services)
 app.register_blueprint(logs)
 app.register_blueprint(portal_bp)
 app.register_blueprint(sessions_bp)
+app.register_blueprint(apps_bp)
 app.register_blueprint(agent_bp)
+app.register_blueprint(admin_features)
 
 def create_app():
     return app

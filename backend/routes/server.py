@@ -87,7 +87,7 @@ def connect_server(id):
         return jsonify({'message': 'SSH connection failed', 'error': error}), 500
 
     try:
-        stdin, stdout, stderr = ssh.exec_command("echo 'welcome to livepanel'")
+        stdin, stdout, stderr = ssh.exec_command("echo 'welcome to LR Remote Access'")
         output = stdout.read().decode() or ''
         error_output = stderr.read().decode() or ''
     except Exception as e:

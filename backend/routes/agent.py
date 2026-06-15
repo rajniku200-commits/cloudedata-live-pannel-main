@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from flask_login import login_required
 from backend.models.agent import Agent
 
 agent_bp = Blueprint('agent', __name__)
@@ -19,12 +20,14 @@ def serialize_agent(agent):
 
 
 @agent_bp.route('/agents', methods=['GET'])
+@login_required
 def get_agents():
     agents = Agent.query.all()
     return jsonify([serialize_agent(agent) for agent in agents])
 
 
 @agent_bp.route('/agents/<agent_id>', methods=['GET'])
+@login_required
 def get_agent(agent_id):
     agent = Agent.query.filter_by(agent_id=agent_id).first()
     if not agent:

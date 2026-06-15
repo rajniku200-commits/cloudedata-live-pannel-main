@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script to verify CloudeData Live Panel backend integration
+Test script to verify LR Remote Access backend integration
 Run this to validate that all components are properly connected
 """
 
