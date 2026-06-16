@@ -4,7 +4,7 @@ from backend.extensions import db
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    ROLES = ('Super Admin', 'Admin', 'Manager', 'Viewer', 'User')
+    ROLES = ('Admin', 'Manager', 'User')
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(128), unique=True, nullable=False)
@@ -17,9 +17,7 @@ class User(UserMixin, db.Model):
 
     @classmethod
     def normalize_role(cls, role):
-        aliases = {'superadmin': 'Super Admin', 'super_admin': 'Super Admin'}
-        raw = (role or 'User').strip()
-        value = aliases.get(raw.lower().replace(' ', ''), raw.title())
+        value = (role or 'User').strip().title()
         if value not in cls.ROLES:
             raise ValueError(f'Invalid role. Allowed roles: {", ".join(cls.ROLES)}')
         return value
@@ -29,17 +27,15 @@ class User(UserMixin, db.Model):
         return self
 
     def has_role(self, *roles):
-        if self.role == 'Super Admin':
-            return True
         return self.role in roles
 
     @property
     def is_admin(self):
-        return self.role in ('Super Admin', 'Admin')
+        return self.role == 'Admin'
 
     @property
     def is_manager(self):
-        return self.role in ('Super Admin', 'Admin', 'Manager')
+        return self.role == 'Manager'
 
     def save(self):
         db.session.add(self)
@@ -74,3 +70,4 @@ class User(UserMixin, db.Model):
     @classmethod
     def username_exists(cls, username):
         return cls.query.filter_by(username=username).count() > 0
+    

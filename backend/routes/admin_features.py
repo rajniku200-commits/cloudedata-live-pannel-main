@@ -214,6 +214,27 @@ def monitoring():
     return jsonify({'success': True, **get_full_status()})
 
 
+@admin_features.route('/health', methods=['GET'])
+def health():
+    status = get_full_status()
+    return jsonify({
+        'success': True,
+        'status': 'healthy',
+        'health': status.get('health', {}),
+        'agents': status.get('agents', {}),
+        'streams': stream_manager.status(),
+    })
+
+
+@admin_features.route('/streams', methods=['GET'])
+@login_required
+def streams():
+    if not _manager_required():
+        return jsonify({'success': False, 'error': 'Forbidden'}), 403
+    agent_id = request.args.get('agent_id')
+    return jsonify({'success': True, 'streams': stream_manager.status(agent_id) if agent_id else stream_manager.status()})
+
+
 @admin_features.route('/error-logs', methods=['GET'])
 @login_required
 def error_logs():

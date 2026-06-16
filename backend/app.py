@@ -2,6 +2,7 @@ import os
 from flask import Flask, redirect, url_for
 from flask_login import current_user
 from sqlalchemy import inspect, text
+from werkzeug.exceptions import HTTPException
 from backend.extensions import login_manager, socketio, db
 from backend.models.user import User
 from backend.models.server import Server
@@ -128,6 +129,8 @@ def test_socket():
 
 @app.errorhandler(Exception)
 def log_unhandled_exception(error):
+    if isinstance(error, HTTPException):
+        return error
     app.logger.exception('Unhandled exception')
     raise error
 
